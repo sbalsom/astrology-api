@@ -7,7 +7,7 @@ class Horoscope < ApplicationRecord
   belongs_to :author
   belongs_to :zodiac_sign
 
-  def self.fetch_horoscopes
+  def self.fetch_vice_horoscopes
     # should I create the vice instance in the seed file ? right now it is there
     @vice = Publication.where(name: "Vice").first
     vice_links = compile_links
@@ -15,31 +15,54 @@ class Horoscope < ApplicationRecord
       html_file = open("https://www.vice.com" + link).read
       html_doc = Nokogiri::HTML(html_file)
       a = html_doc.at("meta[property='article:author']").attributes['content'].value
-      z = html_doc.at("meta[name='news_keywords']").attributes['content'].value
-      author = handle_author(a)
-      zodiac_sign = handle_zodiac(z)
-      # need to get sun sign from scrape
-      # need to get date
-      #  need to get time range
-      content = html_doc.search('.article__body').text.strip
-      Horoscope.create(
-        author: author,
-        zodiac_sign: zodiac_sign,
-        content: content,
-        publication: @vice
-      )
+      c = html_doc.search('.article__body').text.strip
+      t = html_doc.at("title").text
+      d = Time.parse(html_doc.at("meta[name='datePublished']").attributes['content'].value)
+      w = t.scan(/(Daily|Weekly|^Monthly)/).flatten
+      if w[0] == "Daily"
+        handle_dailies(c, a, d)
+      elsif w[0] == "Weekly"
+        handle_weeklies(c, a, d)
+      elsif w[0] == "Monthly"
+        zodiac = ZodiacSign.all.map { |sign| sign.name }
+        s = t.scan(Regexp.union(zodiac))
+        z = ZodiacSign.where(name: s).first
+        # the sign equals the sign from the title
+        handle_monthlies(c, a, z, d)
+      end
     end
     Horoscope.all
-    # t.bigint "publication_id"
-    # t.bigint "author_id"
-    # t.text "content"
-    # t.interval "time_range"
-    # t.date "start_date"
-    # t.bigint "zodiac_sign_id"
-    # article_file = open("https://www.vice.com#{}")
   end
 
-  private
+  def self.handle_dailies(content, author, date)
+    a = handle_author(author)
+    c = content
+    i = 1
+    d = date + 1.days
+    create_horoscope(c, i, a, d)
+  end
+
+  def self.handle_weeklies(content, author, date)
+    a = handle_author(author)
+    c = content
+    i = 7
+    d = date
+    create_horoscope(c, i, a, d)
+  end
+
+  def self.handle_monthlies(content, author, zodiac, date)
+    a = handle_author(author)
+    if Horoscope.where(content: content).empty?
+      Horoscope.create!(
+        content: content,
+        author: a,
+        zodiac_sign: zodiac,
+        publication: @vice,
+        range_in_days: 30,
+        start_date: date
+        )
+    end
+  end
 
   def self.handle_author(author)
     if Author.where(full_name: author).empty?
@@ -52,26 +75,38 @@ class Horoscope < ApplicationRecord
     author
   end
 
-  def self.handle_zodiac(z)
-    @zodiac = ZodiacSign.all
-    sign = ZodiacSign.first
-    words = z.split(',')
-    words.each do |word|
-      @zodiac.each do |zodiac|
-        if zodiac.name == word
-          sign = zodiac
+  def self.create_horoscope(content, interval, author, date)
+    stopwords = ZodiacSign.all.map { |sign| sign.name }
+    stopwords_regex = /(Aries\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Taurus\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Gemini\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Cancer\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Leo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Virgo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Libra\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Scorpio\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Sagittarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Capricorn\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Aquarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Pisces\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\))/
+    text = content.split(stopwords_regex).collect(&:strip).reject(&:empty?)
+    stopwords.each do |s|
+      m = "^#{s}"
+      text.each_with_index do |word, index|
+        matcher = Regexp.new(m)
+        next if word !~ matcher
+
+        zodiac = ZodiacSign.where(name: s).first
+        kontent = text[index + 1]
+        if Horoscope.where(content: kontent).empty?
+          Horoscope.create!(
+            zodiac_sign: zodiac,
+            content: kontent,
+            author: author,
+            range_in_days: interval,
+            start_date: date,
+            publication: @vice
+          )
         end
       end
     end
-    sign
   end
 
   def self.compile_links
     vice_links = []
     base_url = 'https://www.vice.com/en_us/topic/horoscopes?page='
     # for i in 1..190 do
-    i = 0
-    while i <= 2 do
+    i = 1
+    while i <= 10 do
       html_file = open(base_url + i.to_s).read
       html_doc = Nokogiri::HTML(html_file)
       html_doc.search('a.grid__wrapper__card').each do |element|
@@ -81,60 +116,19 @@ class Horoscope < ApplicationRecord
     puts i
     i += 1
     end
-    # perform some rejection on the array of links to get rid of non-horoscope links
-    # articles, or do this before in the first scrape (i.e. if title matches on of the patterns then scrape)
     vice_links
   end
+
+  # end of the class
 end
-#     a = element.search('.grid__wraper__card__text__contributor')
-    #     if Author.where(full_name: a.text.strip).empty?
-    #       puts "creating author #{a.text.strip}"
-    #       @author = Author.create(full_name: a.text.strip)
-    #     else
-    #       puts "referencing author #{a.text.strip}"
-    #       @author = Author.where(full_name: a.text.strip)
-    #     end
-    #     element.search('.grid__wrapper__card__text__title') do |title|
-    #       if !title.text.strip.match('Daily Horoscopes: \w+ \d{1,2}, \d{4}').nil?
-    #         Horoscope.create(
-    #           author: @author,
-                #publication: @vice
-    #         )
-    #       else
-    #         puts "not a match"
-    #       end
-    #     end
-    #   end
 
- # let the scraping begin ! titles , time intervals, taglines, and author names all saved as publication: "Vice"
-    # 190 pages total going back to 2015
-    # horoscope titles usually standardized to Daily Horoscopes or Weekly Horoscopes or Monthly Horoscopes, or has sign name and month name (2015)
-    # in a second scrape, gather horoscopes from every page. but how to do this ? it would need to
-    # iterate over horoscope articles and follow each horoscope link
-    # (maybe with interpolated url)
-    #
-    # in another scrape, gather horoscopes from another website
-    # save all scrapes into horoscopes model
- #   if title ~= /Daily Horoscopes: \w+ \d{1,2}, \d{4}/
-        #    # a pattern that would match to one of the title variants
+# I want to add to my database :
 
-        #
+# total horoscopes written by each author
+# an api view for authors
+# keywords for each horoscope (planets, aspects, etc)
+# social media links for authors
 
-        #   elsif title ~= /Weekly Horoscope: \w+ \d{1,2} - \d{1,2}/
+# 190 pages total going back to 2015
 
-        #     element.search('.grid__wraper__card__text__contributor').each do |author|
-        #       if Author.where(full_name: author.text.strip).empty?
-        #         puts "weekly"
-        #         Author.create(full_name: author.text.strip)
-        #       end
-        #     end
-        #   elsif title ~= /\w+, \w+ \d{4}/ or title ~= /Your Monthly Horoscope: \w+ \d{4}/
-
-        #     element.search('.grid__wraper__card__text__contributor').each do |author|
-        #       if Author.where(full_name: author.text.strip).empty?
-        #         puts "monthly"
-        #         Author.create(full_name: author.text.strip)
-        #       end
-        #     end
-        #   end
-        # end
+#Allure horoscopes

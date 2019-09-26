@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_25_153546) do
+ActiveRecord::Schema.define(version: 2019_09_26_061626) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,11 +25,11 @@ ActiveRecord::Schema.define(version: 2019_09_25_153546) do
     t.bigint "publication_id"
     t.bigint "author_id"
     t.text "content"
-    t.interval "time_range"
     t.date "start_date"
     t.bigint "zodiac_sign_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "range_in_days"
     t.index ["author_id"], name: "index_horoscopes_on_author_id"
     t.index ["publication_id"], name: "index_horoscopes_on_publication_id"
     t.index ["zodiac_sign_id"], name: "index_horoscopes_on_zodiac_sign_id"
