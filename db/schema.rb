@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_26_061626) do
+ActiveRecord::Schema.define(version: 2019_09_26_163401) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,6 +19,8 @@ ActiveRecord::Schema.define(version: 2019_09_26_061626) do
     t.string "full_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "socials", default: [], array: true
+    t.integer "horoscope_count"
   end
 
   create_table "horoscopes", force: :cascade do |t|
@@ -30,6 +32,7 @@ ActiveRecord::Schema.define(version: 2019_09_26_061626) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "range_in_days"
+    t.string "keywords", default: [], array: true
     t.index ["author_id"], name: "index_horoscopes_on_author_id"
     t.index ["publication_id"], name: "index_horoscopes_on_publication_id"
     t.index ["zodiac_sign_id"], name: "index_horoscopes_on_zodiac_sign_id"
