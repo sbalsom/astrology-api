@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_26_164307) do
+ActiveRecord::Schema.define(version: 2019_09_28_175238) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(version: 2019_09_26_164307) do
     t.datetime "updated_at", null: false
     t.integer "range_in_days"
     t.string "keywords", default: [], array: true
+    t.string "original_link"
     t.index ["author_id"], name: "index_horoscopes_on_author_id"
     t.index ["publication_id"], name: "index_horoscopes_on_publication_id"
     t.index ["zodiac_sign_id"], name: "index_horoscopes_on_zodiac_sign_id"
@@ -42,6 +43,7 @@ ActiveRecord::Schema.define(version: 2019_09_26_164307) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "url"
   end
 
   create_table "user_zodiac_signs", force: :cascade do |t|

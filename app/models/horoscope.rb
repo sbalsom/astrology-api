@@ -2,6 +2,7 @@ require 'nokogiri'
 require 'open-uri'
 require 'pry-byebug'
 require 'net/http'
+require 'watir'
 
 class Horoscope < ApplicationRecord
   belongs_to :publication
@@ -345,6 +346,39 @@ class Horoscope < ApplicationRecord
     end
   end
 
+#  cosmo methods
+
+def self.fetch_cosmo_horoscopes
+  @cosmo = Publication.find_by(name: "Cosmopolitan")
+  @cosmo_base_url = "https://www.cosmopolitan.com"
+  cosmo_links = []
+  selector = ".full-item-title"
+  i = 1
+  while i <= 100
+    cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
+    # cosmo_links_links += compile_links(cosmo_infinite_url, selector)
+    html_file = open(cosmo_infinite_url).read
+    html_doc = Nokogiri::HTML(html_file)
+    html_doc.search(selector).each do |element|
+      a = element.attributes['href'].value
+      cosmo_links << a
+    end
+    i += 1
+  end
+  puts "number of cosmo links : #{cosmo_links.count}"
+  puts "number of unique cosmo links : #{cosmo_links.uniq.count}"
+  zodiac_regex = /(horoscope|horoscopes|weekly|monthly|daily|week)/
+  cosmo_links = cosmo_links.reject do |l|
+    zodiac_regex.match(l).nil?
+  end
+  cosmo_links.each do |path|
+    cosmo_scraper(path)
+  end
+end
+
+def self.cosmo_scraper(path)
+
+end
 
 end
 
