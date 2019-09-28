@@ -57,14 +57,14 @@ class Horoscope < ApplicationRecord
     ]
     text = horoscope.content
     regex = /#{Regexp.union(keywords)}/
-    matches = text.downcase.scan(regex)
-    matches.each do |match|
+    matches = text&.downcase&.scan(regex)
+    matches&.each do |match|
       horoscope.keywords << match unless horoscope.keywords.include?(match)
     end
     horoscope.save
   end
 
-  def self.compile_links(base_url, selector, query)
+  def self.compile_links(base_url, selector, query = '')
     links = []
     html_file = open(base_url + query.to_s).read
     html_doc = Nokogiri::HTML(html_file)
@@ -80,11 +80,9 @@ class Horoscope < ApplicationRecord
     html_doc = Nokogiri::HTML(html_file)
     socials = html_doc.search(selector)
     socials.each do |s|
-      unless s.nil?
-        link = s.attributes['href'].value
-        author.socials << link unless author.socials.include?(link)
-        author.save
-      end
+      link = s&.attributes['href'].value
+      author.socials << link unless author.socials.include?(link)
+      author.save
     end
   end
 
@@ -97,15 +95,14 @@ class Horoscope < ApplicationRecord
     main_path = '/en_us/topic/horoscopes?page='
     b = @vice_base_url + main_path
     vice_links = []
-    i = 48
+    i = 46
     # compiling links to be scraped
-    while i <= 49 do
+    while i <= 100
       vice_links += compile_links(b, 'a.topics-card__heading-link', i)
       i += 1
     end
     puts vice_links
     vice_scraper(vice_links)
-    Horoscope.all
   end
 
   def self.vice_scraper(vice_links)
@@ -119,52 +116,43 @@ class Horoscope < ApplicationRecord
       raw_content = html_doc.search('.article__body')
       title = html_doc.at("title").text
 
-      # finds the author in the db
-      author = handle_author(raw_author)
-
       # gets social links for handling socials
       s = html_doc.at(".contributor__link")
       # only adds social links if the author doesn't already exist and the path leads to author page
-      if s.attributes['title'] == raw_author && !@vice.authors.include?(author)
-        social_path = s.attributes['href'].value
-        social_selector = ".contributor__profile__bio a"
-        handle_socials(@vice_base_url, social_path, social_selector, author)
-      end
 
       # checks the title to see which kind of horoscope it is for handling
       range = title.scan(/(Daily|Weekly|^Monthly)/).flatten
       type = range[0]
       # sets interval in days for each type of horoscope
-      interval = set_interval(type)
-      p interval
-      # this is nil whoops
+      interval = interval(type)
 
-      # zips dailies and weeklies into a hash
       unless /Daily|Weekly/.match(range[0]).nil?
-        horoscope_hash = horoscope_zip(raw_content)
+        author = handle_author(raw_author)
         range[0] == "Daily" ? date = date_published + 1.days : date = date_published
+        horoscope_hash = horoscope_zip(raw_content)
         create_vice_horoscope(horoscope_hash, author, interval, date)
       end
-
       #  monthlies are handled separately bc they are separate articles
       if range[0] == "Monthly"
-        # zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
+        author = handle_author(raw_author)
         sign = title.scan(@@zodiac_regex)
         zodiac = ZodiacSign.find_by(name: sign)
-        binding.pry
         content = raw_content.text.strip.sub("Download the Astro Guide app by VICE on an iOS device to read daily horoscopes personalized for your sun, moon, and rising signs, and learn how to apply cosmic events to self care, your friendships, and relationships.", '')
-        date = raw_date
+        date = date_published
         handle_vice_monthlies(content, author, zodiac, date)
       end
-
-      # older horoscopes have different formatting (~past page 48)
-      if date_published <= Time.parse("2018-10-12 00:00:00")
-        # should handle older ones differently, come back to this and change the date...
+      #  only do this if author is new and variable exists (is a horoscope author)
+      if !s.nil?
+        if author && s&.attributes['title'] == raw_author && !@vice.authors.include?(author)
+          social_path = s&.attributes['href'].value
+          social_selector = ".contributor__profile__bio a"
+          handle_socials(@vice_base_url, social_path, social_selector, author)
+        end
       end
     end
   end
 
-  def self.set_interval(type)
+  def self.interval(type)
     return 1 if type == "Daily"
     return 7 if type == "Weekly"
     return 30 if type == "Monthly"
@@ -190,31 +178,16 @@ class Horoscope < ApplicationRecord
   end
 
   def self.horoscope_zip(raw_content)
+    stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
     headers = raw_content.search('h2')
-    headers = headers.map { |header| header.text[@@zodiac_regex] }
-    array = []
-    horoscopes = []
-    raw_content.children.each do |node|
-      if node.name == "h2"
-        array << node
-      elsif node.name == "p"
-        array << node
-      end
-
-    end
+    paragraphs = raw_content.search('p')
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|\s{2})/, "")}
+    a = array.reject { |el| el.length < 42 }
+    a = a.pop(12)
+    h = headers.map { |header| header.text[@@zodiac_regex] }
+    h = h.compact
     binding.pry
-    array.each_with_index do |node, index|
-      if array[index-1].name == 'h2'
-        horoscopes << node
-      end
-    end
-    text = horoscopes.map {|t| t.text}
-    binding.pry
-    Hash[headers.zip(text)]
-  end
-
-  def self.handle_old_dailies(content_hash, interval, author, date)
-    puts "handling....."
+    Hash[h.zip(a)]
   end
 
   def self.handle_vice_monthlies(content, author, zodiac, date)
@@ -247,7 +220,6 @@ class Horoscope < ApplicationRecord
         next if e.message == '404 Not Found'
       end
     end
-    # end
   end
 
   def self.compile_allure_links
@@ -281,13 +253,13 @@ class Horoscope < ApplicationRecord
     year = link.scan(/\d{4}/)
     date = DateTime.parse("1 #{month} #{year}")
     if Horoscope.where(content: content).empty?
-     h = Horoscope.create(
-      zodiac_sign: sign,
-      content: content,
-      author: author,
-      range_in_days: 30,
-      start_date: date,
-      publication: @allure
+      h = Horoscope.create(
+        zodiac_sign: sign,
+        content: content,
+        author: author,
+        range_in_days: 30,
+        start_date: date,
+        publication: @allure
       )
       puts h
       author.horoscope_count += 1
@@ -298,6 +270,19 @@ class Horoscope < ApplicationRecord
       selector = '.social-links a'
       handle_socials(@allure_base_url, social_path, selector, author)
     end
+  end
+
+  #  autostraddle methods
+
+  def self.fetch_autostraddle_horoscopes
+    @autostraddle = Publication.find_by(name: "Autostraddle")
+    selector = ".entry-title a"
+    i = 1
+    while i < 3
+      topic_url = "https://www.autostraddle.com/tag/queer-horoscopes/page/#{i}/"
+      auto_links = compile_links(topic_url, selector)
+    end
+    auto_links
   end
 
 
@@ -317,14 +302,21 @@ end
 
 #  i might need this code if i cant get the zip to work
 
-  # def self.create_vice_horoscope(content, interval, author, date)
-  #   stopwords = ZodiacSign.all.map { |sign| sign.name }
+    # if date_published >= Time.parse("2018-10-12 00:00:00")
+          # newer dailies and weeklies are handled with stopwords
+        #   handle_vice_horoscope(raw_content, interval, author, date)
+        # else
+          # older dailies and weeklies are zipped into a hash
+          # (this method is not really working)
+
+  # def self.handle_vice_horoscope(content, interval, author, date)
   #   stopwords_regex = /(Aries\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Taurus\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Gemini\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Cancer\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Leo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Virgo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Libra\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Scorpio\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Sagittarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Capricorn\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Aquarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Pisces\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\))/
-  #   text = content.split(stopwords_regex).collect(&:strip).reject(&:empty?)
-  #   stopwords.each do |s|
+  #   text = content.text.split(stopwords_regex).collect(&:strip).reject(&:empty?)
+  #   @@zodiac_signs.each do |s|
   #     matcher = /^#{s}\s\(\w+\s\d{2}\s-\s\w+\s\d{2}/
   #     text.each_with_index do |word, index|
   #       next if word !~ matcher
+
   #       kontent = text[index + 1].gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.)/, '')
   #       if Horoscope.where(content: kontent).empty?
   #         zodiac = ZodiacSign.find_by(name: s)
