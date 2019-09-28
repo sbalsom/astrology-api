@@ -15,6 +15,7 @@ class Horoscope < ApplicationRecord
   @@zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
   @@zodiac_regex = Regexp.union(@@zodiac_signs)
 
+# retrieves the author from the database
   def self.handle_author(author)
     if author == "Annabel Get"
       author = "Annabel Gat"
@@ -30,6 +31,8 @@ class Horoscope < ApplicationRecord
     end
     author
   end
+
+  # adds keywords to any horoscope
 
   def self.handle_keywords(horoscope)
     keywords = [
@@ -51,7 +54,10 @@ class Horoscope < ApplicationRecord
       "square",
       "conjunct",
       "moon",
-      "sun"
+      "sun",
+      "sextile",
+      "opposition",
+      "opposite"
     ]
     text = horoscope.content
     regex = /#{Regexp.union(keywords)}/
@@ -73,23 +79,50 @@ class Horoscope < ApplicationRecord
     links
   end
 
-  def self.handle_socials(base_url, path, selector, author)
-    html_file = open(base_url + path).read
-    html_doc = Nokogiri::HTML(html_file)
-    socials = html_doc.search(selector)
-    socials.each do |s|
-      link = s&.attributes['href'].value
-      author.socials << link unless author.socials.include?(link)
-      author.save
-    end
+# adds socials to the author
+
+
+def self.handle_socials(doc,first_selector, publication, second_selector, author)
+# grab the element from the DOM that has the link inside it
+  byline = doc.at(first_selector)
+  # get the href from this element
+  path = byline&.attributes['href'].value
+  # navigate to this link
+  html_file = open(publication.url + path).read
+  html_doc = Nokogiri::HTML(html_file)
+  socials = html_doc.search(second_selector)
+  socials.each do |s|
+    link = s&.attributes['href'].value
+    author.socials << link unless author.socials.include?(link)
+    author.save
   end
+end
+
+
+  # builds horoscope
+def self.build_horoscope(content, zodiac, author, interval, date, publication, url)
+  if Horoscope.where(content: content).empty?
+      h = Horoscope.create(
+        zodiac_sign: zodiac,
+        content: content,
+        author: author,
+        range_in_days: interval,
+        start_date: date,
+        publication: @elle,
+        original_url: base_url + path
+      )
+      author.horoscope_count += 1
+      author.save
+      handle_keywords(h)
+    end
+end
 
   # vice methods
 
   def self.fetch_vice_horoscopes
     # should I create the vice instance in the seed file ? right now it is there
     @vice = Publication.find_by(name: "Vice")
-    @vice_base_url = 'https://www.vice.com'
+    # @vice_base_url = 'https://www.vice.com'
     main_path = '/en_us/topic/horoscopes?page='
     b = @vice_base_url + main_path
     vice_links = []
@@ -113,10 +146,6 @@ class Horoscope < ApplicationRecord
       raw_content = html_doc.search('.article__body')
       title = html_doc.at("title").text
 
-      # gets social links for handling socials
-      s = html_doc.at(".contributor__link")
-      # only adds social links if the author doesn't already exist and the path leads to author page
-
       # checks the title to see which kind of horoscope it is for handling
       range = title.scan(/(Daily|Weekly|^Monthly)/).flatten
       type = range[0]
@@ -127,7 +156,9 @@ class Horoscope < ApplicationRecord
         author = handle_author(raw_author)
         range[0] == "Daily" ? date = date_published + 1.days : date = date_published
         horoscope_hash = horoscope_zip(raw_content)
-        create_vice_horoscope(horoscope_hash, author, interval, date)
+        horoscope_hash.each do |sign, content|
+          build_horoscope(content, sign, author, interval, date, publication, link)
+        end
       end
       #  monthlies are handled separately bc they are separate articles
       if range[0] == "Monthly"
@@ -135,44 +166,22 @@ class Horoscope < ApplicationRecord
         sign = title.scan(@@zodiac_regex)
         zodiac = ZodiacSign.find_by(name: sign)
         content = raw_content.text.strip.sub("Download the Astro Guide app by VICE on an iOS device to read daily horoscopes personalized for your sun, moon, and rising signs, and learn how to apply cosmic events to self care, your friendships, and relationships.", '')
-        date = date_published
-        handle_vice_monthlies(content, author, zodiac, date)
+        build_horoscope(content, zodiac, author, 30, date_published, @vice, link)
       end
       #  only do this if author is new and variable exists (is a horoscope author)
-      if !s.nil?
-        if author && s&.attributes['title'] == raw_author && !@vice.authors.include?(author)
-          social_path = s&.attributes['href'].value
-          social_selector = ".contributor__profile__bio a"
-          handle_socials(@vice_base_url, social_path, social_selector, author)
-        end
+      if author
+        handle_socials(html_doc, ".contributor__link", @vice, ".contributor__profile__bio a", author)
       end
     end
   end
+
 
   def self.interval(type)
     return 1 if type == "Daily"
     return 7 if type == "Weekly"
     return 30 if type == "Monthly"
   end
-
-  def self.create_vice_horoscope(horoscope_hash, author, interval, date)
-    horoscope_hash.each do |sign, content|
-      if Horoscope.where(content: content).empty?
-        zodiac = ZodiacSign.find_by(name: sign)
-        h = Horoscope.create!(
-          zodiac_sign: zodiac,
-          content: content,
-          author: author,
-          range_in_days: interval,
-          start_date: date,
-          publication: @vice
-        )
-        author.horoscope_count += 1
-        author.save
-        handle_keywords(h)
-      end
-    end
-  end
+# refactor
 
   def self.horoscope_zip(raw_content)
     stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
@@ -184,22 +193,6 @@ class Horoscope < ApplicationRecord
     h = headers.map { |header| header.text[@@zodiac_regex] }
     h = h.compact
     Hash[h.zip(a)]
-  end
-
-  def self.handle_vice_monthlies(content, author, zodiac, date)
-    if Horoscope.where(content: content).empty?
-      h = Horoscope.create!(
-        content: content,
-        author: author,
-        zodiac_sign: zodiac,
-        publication: @vice,
-        range_in_days: 30,
-        start_date: date
-      )
-      author.horoscope_count += 1
-      author.save
-      handle_keywords(h)
-    end
   end
 
   # allure methods
@@ -230,7 +223,7 @@ class Horoscope < ApplicationRecord
     end
     links
   end
-
+# refactor all create methods into one
   def self.allure_scrape(doc, link)
     raw_author = doc.search('.byline__name-link').text
     author = handle_author(raw_author)
@@ -248,23 +241,9 @@ class Horoscope < ApplicationRecord
     month = link.scan(Regexp.union(months))
     year = link.scan(/\d{4}/)
     date = DateTime.parse("1 #{month} #{year}")
-    if Horoscope.where(content: content).empty?
-      h = Horoscope.create(
-        zodiac_sign: sign,
-        content: content,
-        author: author,
-        range_in_days: 30,
-        start_date: date,
-        publication: @allure
-      )
-      author.horoscope_count += 1
-      author.save
-      handle_keywords(h)
-      @allure_base_url = 'https://www.allure.com'
-      social_path = doc.at(".byline__name-link").attributes['href'].value
-      selector = '.social-links a'
-      handle_socials(@allure_base_url, social_path, selector, author)
-    end
+    build_horoscope(content, sign, author, 30, date, @allure, link)
+    # handle allure socials
+    handle_socials(doc, ".byline__name-link", @allure, '.social-links a', author)
   end
 
   #  autostraddle methods
@@ -304,7 +283,6 @@ class Horoscope < ApplicationRecord
     @elle = Publication.find_by(name: "Elle")
     zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
     zodiac_regex = Regexp.union(zodiac_signs)
-    @elle_base_url = "https://www.elle.com"
     paths = [
       "/horoscopes/daily/",
       "/horoscopes/weekly/",
@@ -312,7 +290,7 @@ class Horoscope < ApplicationRecord
     selector = '.simple-item-title'
     elle_paths = []
     paths.each do |p|
-      url = @elle_base_url + p
+      url = @elle.url + p
       elle_paths += compile_links(url, selector)
     end
     elle_paths.each do |path|
@@ -320,37 +298,25 @@ class Horoscope < ApplicationRecord
       z.nil? ? next : zodiac = ZodiacSign.find_by(name: z)
       r = /(daily|weekly|monthly)/.match(path)&.to_s&.capitalize
       i = interval(r)
-      elle_scraper(@elle_base_url, path, zodiac, i)
+      elle_scraper(path, zodiac, i)
       end
   end
 
-  def self.elle_scraper(base_url, path, zodiac, interval)
-    file = open(base_url + path)
+  def self.elle_scraper(path, zodiac, interval)
+    url = @elle.url + path
+    file = open(url)
     doc = Nokogiri::HTML(file)
     raw_author = doc.search(".byline-name").text
     author = handle_author(raw_author)
     content = doc.search('.body-text').text
     date = Time.parse(doc.at(".content-info-date").text)
-    if Horoscope.where(content: content).empty?
-      h = Horoscope.create(
-        zodiac_sign: zodiac,
-        content: content,
-        author: author,
-        range_in_days: interval,
-        start_date: date,
-        publication: @elle
-      )
-      author.horoscope_count += 1
-      author.save
-      handle_keywords(h)
-    end
+    build_horoscope(content, zodiac, author, interval, date, @elle, url)
   end
 
 #  cosmo methods
 
 def self.fetch_cosmo_horoscopes
   @cosmo = Publication.find_by(name: "Cosmopolitan")
-  @cosmo_base_url = "https://www.cosmopolitan.com"
   cosmo_links = []
   selector = ".full-item-title"
   i = 1
@@ -377,10 +343,15 @@ def self.fetch_cosmo_horoscopes
 end
 
 def self.cosmo_scraper(path)
+  html_file = open(@cosmo.url + path).read
+  html_doc = Nokogiri::HTML(html_file)
+  binding.pry
+  content = html_doc.search('.body-text').text
 
 end
 
 end
+
 
 # I want to add to my database :
 
