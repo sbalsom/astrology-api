@@ -1,12 +1,7 @@
 require 'nokogiri'
 require 'open-uri'
-# require 'watir'
 require 'pry-byebug'
 require 'net/http'
-
-# ideally this should all belong to a class called scraper that can be modified depending on the publication
-# Scraper.new(publication, base_url) would call the class scraper
-#  oh well maybe that's for another version
 
 class Horoscope < ApplicationRecord
   belongs_to :publication
@@ -22,6 +17,8 @@ class Horoscope < ApplicationRecord
   def self.handle_author(author)
     if author == "Annabel Get"
       author = "Annabel Gat"
+    elsif author == "The AstroTwinsThe AstroTwins"
+      author = "Tali and Ophira Edut"
     end
     if Author.where(full_name: author).empty?
       puts "creating author #{author}"
@@ -95,13 +92,12 @@ class Horoscope < ApplicationRecord
     main_path = '/en_us/topic/horoscopes?page='
     b = @vice_base_url + main_path
     vice_links = []
-    i = 46
+    i = 1
     # compiling links to be scraped
-    while i <= 100
+    while i <= 190
       vice_links += compile_links(b, 'a.topics-card__heading-link', i)
       i += 1
     end
-    puts vice_links
     vice_scraper(vice_links)
   end
 
@@ -181,12 +177,11 @@ class Horoscope < ApplicationRecord
     stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
     headers = raw_content.search('h2')
     paragraphs = raw_content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|\s{2})/, "")}
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|What's in the stars for you in|\s{2})/, "")}
     a = array.reject { |el| el.length < 42 }
     a = a.pop(12)
     h = headers.map { |header| header.text[@@zodiac_regex] }
     h = h.compact
-    binding.pry
     Hash[h.zip(a)]
   end
 
@@ -261,7 +256,6 @@ class Horoscope < ApplicationRecord
         start_date: date,
         publication: @allure
       )
-      puts h
       author.horoscope_count += 1
       author.save
       handle_keywords(h)
@@ -278,11 +272,77 @@ class Horoscope < ApplicationRecord
     @autostraddle = Publication.find_by(name: "Autostraddle")
     selector = ".entry-title a"
     i = 1
-    while i < 3
+    auto_links = []
+    while i <= 3
       topic_url = "https://www.autostraddle.com/tag/queer-horoscopes/page/#{i}/"
-      auto_links = compile_links(topic_url, selector)
+      auto_links += compile_links(topic_url, selector)
+      i += 1
     end
-    auto_links
+    auto_links = auto_links.select { |link| /queer-horoscopes/.match(link) }
+    auto_scraper(auto_links)
+  end
+
+  def self.auto_scraper(links)
+    links.each do |link|
+      file = open(link)
+      doc = Nokogiri::HTML(file)
+      text = doc.search('.entry-content')
+      hash = auto_zip(text)
+    end
+  end
+
+  def self.auto_zip(text)
+    headers = text.search('h2')
+    paragraphs = text.search('p')
+    # autostraddle scrape seems like it will be difficult, come back to this
+  end
+
+  #  elle methods
+
+  def self.fetch_elle_horoscopes
+    @elle = Publication.find_by(name: "Elle")
+    zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
+    zodiac_regex = Regexp.union(zodiac_signs)
+    @elle_base_url = "https://www.elle.com"
+    paths = [
+      "/horoscopes/daily/",
+      "/horoscopes/weekly/",
+      "/horoscopes/monthly/"]
+    selector = '.simple-item-title'
+    elle_paths = []
+    paths.each do |p|
+      url = @elle_base_url + p
+      elle_paths += compile_links(url, selector)
+    end
+    elle_paths.each do |path|
+      z = zodiac_regex.match(path)&.to_s&.capitalize
+      z.nil? ? next : zodiac = ZodiacSign.find_by(name: z)
+      r = /(daily|weekly|monthly)/.match(path)&.to_s&.capitalize
+      i = interval(r)
+      elle_scraper(@elle_base_url, path, zodiac, i)
+      end
+  end
+
+  def self.elle_scraper(base_url, path, zodiac, interval)
+    file = open(base_url + path)
+    doc = Nokogiri::HTML(file)
+    raw_author = doc.search(".byline-name").text
+    author = handle_author(raw_author)
+    content = doc.search('.body-text').text
+    date = Time.parse(doc.at(".content-info-date").text)
+    if Horoscope.where(content: content).empty?
+      h = Horoscope.create(
+        zodiac_sign: zodiac,
+        content: content,
+        author: author,
+        range_in_days: interval,
+        start_date: date,
+        publication: @elle
+      )
+      author.horoscope_count += 1
+      author.save
+      handle_keywords(h)
+    end
   end
 
 
@@ -297,41 +357,10 @@ end
 
 # more associations : author has many publications, through horoscopes
 
+# ideally this should all belong to a class called scraper that can be modified depending on the publication
+# Scraper.new(publication, base_url) would call the class scraper
+#  oh well maybe that's for another version
+
+
 # Vice : 190 pages total going back to 2015
 
-
-#  i might need this code if i cant get the zip to work
-
-    # if date_published >= Time.parse("2018-10-12 00:00:00")
-          # newer dailies and weeklies are handled with stopwords
-        #   handle_vice_horoscope(raw_content, interval, author, date)
-        # else
-          # older dailies and weeklies are zipped into a hash
-          # (this method is not really working)
-
-  # def self.handle_vice_horoscope(content, interval, author, date)
-  #   stopwords_regex = /(Aries\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Taurus\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Gemini\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Cancer\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Leo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Virgo\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Libra\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Scorpio\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Sagittarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Capricorn\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Aquarius\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)|Pisces\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\))/
-  #   text = content.text.split(stopwords_regex).collect(&:strip).reject(&:empty?)
-  #   @@zodiac_signs.each do |s|
-  #     matcher = /^#{s}\s\(\w+\s\d{2}\s-\s\w+\s\d{2}/
-  #     text.each_with_index do |word, index|
-  #       next if word !~ matcher
-
-  #       kontent = text[index + 1].gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.)/, '')
-  #       if Horoscope.where(content: kontent).empty?
-  #         zodiac = ZodiacSign.find_by(name: s)
-  #         h = Horoscope.create!(
-  #           zodiac_sign: zodiac,
-  #           content: kontent,
-  #           author: author,
-  #           range_in_days: interval,
-  #           start_date: date,
-  #           publication: @vice
-  #         )
-  #         author.horoscope_count += 1
-  #         author.save
-  #         handle_keywords(h)
-  #       end
-  #     end
-  #   end
-  # end
