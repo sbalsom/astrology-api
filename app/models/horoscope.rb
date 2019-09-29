@@ -21,6 +21,18 @@ class Horoscope < ApplicationRecord
   @@zodiac_regex = Regexp.union(@@zodiac_signs)
   @@downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
   @@downcase_z_regex = Regexp.union(@@downcase_zodiac)
+  ADVERTISING_PHRASES = [
+    "Download the Astro Guide app by VICE on an iOS device",
+    "to read daily horoscopes personalized for your sun, moon, and rising signs,",
+    "and learn how to apply cosmic events to self care, your friendships, and relationships.",
+    "Read your monthly horoscope here.",
+    "Want these horoscopes sent straight to your inbox?",
+    "Click here to sign up for the newsletter.",
+    "What's in the stars for you in",
+    "Read more stories about astrology:",
+    "These are the signs you're most compatible with romantically:"
+  ]
+  @@advertising_regex = Regex.union(ADVERTISING_PHRASES)
 
 # retrieves the author from the database
   def self.handle_author(author)
@@ -89,9 +101,6 @@ class Horoscope < ApplicationRecord
     links
   end
 
-# adds socials to the author
-
-
   # builds horoscope
 def self.build_horoscope(content, zodiac, author, interval, date, publication, url)
   if Horoscope.where(content: content).empty?
@@ -113,39 +122,38 @@ end
   # vice methods
 
   def self.fetch_vice_horoscopes
-    # should I create the vice instance in the seed file ? right now it is there
     @vice = Publication.find_by(name: "Vice")
-    # @vice_base_url = 'https://www.vice.com'
+    scraper = ViceScraper.new(@vice)
     main_path = '/en_us/topic/horoscopes?page='
     b = @vice.url + main_path
-    vice_links = []
+    links = []
     i = 100
-    # compiling links to be scraped
     while i <= 190
-      vice_links += compile_links(b, 'a.topics-card__heading-link', i)
+      links += scraper.compile_links(b, 'a.topics-card__heading-link', i)
       i += 1
     end
-    vice_scraper(vice_links)
+    scraper.scrape(links)
   end
 
-  def self.vice_scraper(vice_links)
+  def self.vice_scraper(vice_links, doc)
     vice_links.each do |link|
-      html_file = open(link).read
-      html_doc = Nokogiri::HTML(html_file)
 
       #  grabs raw elements from the DOM
-      raw_author = html_doc.at(".contributor__link")&.text
+      raw_author = doc.at(".contributor__link")&.text
       raw_author = "Unknown" if raw_author.nil?
 
-      date_published = Time.parse(html_doc.at("meta[name='datePublished']").attributes['content'].value)
-      raw_content = html_doc.search('.article__body')
-      title = html_doc.at("title").text
+      date_published = Time.parse(doc.at("meta[name='datePublished']").attributes['content'].value)
+      raw_content = doc.search('.article__body')
+      title = doc.at("title").text
 
       # checks the title to see which kind of horoscope it is for handling
       range = title.scan(/(Daily|Weekly|^Monthly)/).flatten
       type = range[0]
       # sets interval in days for each type of horoscope
       interval = interval(type)
+      # could return an object {range_in_days: interval, }
+
+      # this could be another method
 
       unless /Daily|Weekly/.match(range[0]).nil?
         author = handle_author(raw_author)
@@ -161,12 +169,12 @@ end
         author = handle_author(raw_author)
         sign = title.scan(@@zodiac_regex)
         zodiac = ZodiacSign.find_by(name: sign)
-        content = raw_content.text.strip.sub("Download the Astro Guide app by VICE on an iOS device to read daily horoscopes personalized for your sun, moon, and rising signs, and learn how to apply cosmic events to self care, your friendships, and relationships.", '')
+        content = raw_content.text.strip.sub(@@advertising_regex, '')
         build_horoscope(content, zodiac, author, 30, date_published, @vice, link)
       end
       #  only do this if author is new and variable exists (is a horoscope author)
       if author
-        author.handle_socials(html_doc, ".contributor__link", @vice, ".contributor__profile__bio a")
+        author.handle_socials(doc, ".contributor__link", @vice, ".contributor__profile__bio a")
       end
     end
   end
@@ -183,7 +191,7 @@ end
     stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
     headers = raw_content.search('h2')
     paragraphs = raw_content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(/(Read your monthly horoscope here.|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|What's in the stars for you in|\s{2})/, "")}
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
     a = array.reject { |el| el.length < 42 }
     a = a.pop(12)
     h = headers.map { |header| header.text[@@zodiac_regex] }
@@ -227,7 +235,7 @@ end
     body_paragraphs = doc.search('.article__body p')
     body_paragraphs.shift
     body_paragraphs.pop
-    b = body_paragraphs.text.gsub(/(Read more stories about astrology:|These are the signs you're most compatible with romantically:)/, '')
+    b = body_paragraphs.text.gsub(@@advertising_regex, '')
     content = "#{lede} #{b}"
     # zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
     months = Date::MONTHNAMES.slice(1, 12).map { |x| x.downcase }
@@ -414,7 +422,7 @@ end
       match.nil? ? date = Time.now : date = Time&.parse(match)
       # date = Time.parse(links[index].text)
       url = @mask.url + path
-      hash = visit_links(url, '.body')
+      hash = scraper.visit_links(url, '.body')
       hash.each do |sign, content|
         zodiac = ZodiacSign.find_by(name: sign)
         build_horoscope(content, zodiac, author, 30, date, @mask, url)
