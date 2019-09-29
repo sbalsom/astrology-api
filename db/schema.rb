@@ -10,10 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_28_175238) do
+ActiveRecord::Schema.define(version: 2019_09_29_100107) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "allure_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "authors", force: :cascade do |t|
     t.string "full_name"
@@ -21,6 +26,21 @@ ActiveRecord::Schema.define(version: 2019_09_28_175238) do
     t.datetime "updated_at", null: false
     t.string "socials", default: [], array: true
     t.integer "horoscope_count", default: 0
+  end
+
+  create_table "auto_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "cosmo_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "elle_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "horoscopes", force: :cascade do |t|
@@ -46,6 +66,11 @@ ActiveRecord::Schema.define(version: 2019_09_28_175238) do
     t.string "url"
   end
 
+  create_table "scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "user_zodiac_signs", force: :cascade do |t|
     t.bigint "zodiac_sign_id"
     t.integer "sign_type"
@@ -66,6 +91,11 @@ ActiveRecord::Schema.define(version: 2019_09_28_175238) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  create_table "vice_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "zodiac_signs", force: :cascade do |t|

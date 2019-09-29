@@ -21,7 +21,7 @@ class Scraper < ApplicationRecord
     "Read more stories about astrology:",
     "These are the signs you're most compatible with romantically:"
   ]
-  @@advertising_regex = Regex.union(ADVERTISING_PHRASES)
+  @@advertising_regex = Regexp.union(ADVERTISING_PHRASES)
 
   def compile_links(base_url, selector, query = '')
     links = []

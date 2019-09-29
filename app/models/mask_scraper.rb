@@ -1,0 +1,2 @@
+class MaskScraper < Scraper
+end
