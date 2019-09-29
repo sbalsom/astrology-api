@@ -3,6 +3,7 @@ require 'open-uri'
 require 'pry-byebug'
 require 'net/http'
 require 'watir'
+require_relative 'scraper'
 
 class Horoscope < ApplicationRecord
   belongs_to :publication
@@ -171,10 +172,10 @@ end
   end
 
 
-  def self.interval(type)
-    return 1 if type == "Daily"
-    return 7 if type == "Weekly"
-    return 30 if type == "Monthly"
+  def self.interval(string)
+    return 1 if string == "Daily"
+    return 7 if string == "Weekly"
+    return 30 if string == "Monthly"
   end
 # refactor
 
@@ -397,6 +398,8 @@ end
 
   def self.fetch_mask_horoscopes
     @mask = Publication.find_by(name: "Mask Magazine")
+    scraper = Scraper.new(@mask)
+
     url = 'http://www.maskmagazine.com/contributors/corina-dross'
     file = open(url).read
     doc = Nokogiri::HTML(file)
