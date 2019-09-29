@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :horoscopes, only: [ :index, :show ]
       resources :publications, only: [ :index, :show ]
+      resources :authors, only: [:index, :show]
     end
   end
 end

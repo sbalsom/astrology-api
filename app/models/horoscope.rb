@@ -9,6 +9,10 @@ class Horoscope < ApplicationRecord
   belongs_to :author
   belongs_to :zodiac_sign
 
+  validates :content, presence: true, uniqueness: true
+
+  #  i would like to refactor all the zips down to one method, let them all return a hash and then deal with that hash in a uniform way.
+
   # classwide methods and variables
 
   # sets up a handy zodiac regex and array
@@ -25,6 +29,8 @@ class Horoscope < ApplicationRecord
       author = "Tali and Ophira Edut"
     elsif author == "Aliza Kelly Faragher"
       author = "Aliza Kelly"
+    elsif author == "Corina"
+      author = "Corina Dross"
     end
     if Author.where(full_name: author).empty?
       puts "creating author #{author}"
@@ -245,6 +251,7 @@ end
     while i <= 3
       topic_url = "https://www.autostraddle.com/tag/queer-horoscopes/page/#{i}/"
       auto_links += compile_links(topic_url, selector)
+      puts i
       i += 1
     end
     auto_links = auto_links.select { |link| /queer-horoscopes/.match(link) }
@@ -253,18 +260,36 @@ end
 
   def self.auto_scraper(links)
     links.each do |link|
+      puts link
       file = open(link)
       doc = Nokogiri::HTML(file)
       text = doc.search('.entry-content')
+      # author not working
+      raw_author = doc.at("a[rel='author']").text
+      author = handle_author(raw_author)
+      date = Time.parse(doc.at('time').text)
       hash = auto_zip(text)
+      hash.each do |sign, content|
+        zodiac = ZodiacSign.find_by(name: sign)
+        build_horoscope(content, zodiac, author, 7, date, @autostraddle, link)
+      end
+      # could be its own method
+    # author.handle_simple_socials('.sd-content a', doc)
     end
   end
+  # this is probably the simplest method ive come up with ! use it for the others ?
 
-  # def self.auto_zip(text)
-  #   headers = text.search('h2')
-  #   paragraphs = text.search('p')
-  #   # autostraddle scrape seems like it will be difficult, come back to this
-  # end
+  def self.auto_zip(text)
+    text.to_enum.map(&:text)
+    t = text.children.map { |x| x.text.strip }
+    t = t.reject { |x| x == "" }
+    t = t.join('~*~')
+    signs = t.scan(/~\*~\w{3,20}~\*~/)
+    horoscopes = t.split(/~\*~\w{3,20}~\*~/).pop(12)
+    h = horoscopes.map {|x| x.gsub(/~\*~/, '')}
+    signs = signs.map {|s| s.gsub(/~\*~/, '')}
+    Hash[signs.zip(h)]
+  end
 
   #  elle methods
 
@@ -275,7 +300,8 @@ end
     paths = [
       "/horoscopes/daily/",
       "/horoscopes/weekly/",
-      "/horoscopes/monthly/"]
+      "/horoscopes/monthly/"
+    ]
     selector = '.simple-item-title'
     elle_paths = []
     paths.each do |p|
@@ -309,7 +335,7 @@ end
     cosmo_links = []
     selector = ".full-item-title"
     i = 1
-    while i <= 100
+    while i <= 70
       cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
       # cosmo_links_links += compile_links(cosmo_infinite_url, selector)
       html_file = open(cosmo_infinite_url).read
@@ -318,16 +344,14 @@ end
         a = element.attributes['href'].value
         cosmo_links << a
       end
+      puts i
       i += 1
     end
-    puts "number of cosmo links : #{cosmo_links.count}"
-    puts "number of unique cosmo links : #{cosmo_links.uniq.count}"
     zodiac_regex = /(horoscope|horoscopes|weekly|monthly|daily|week)/
     @cosmo_links = cosmo_links.reject do |l|
       zodiac_regex.match(l).nil?
     end
     @cosmo_links.each do |path|
-      puts path
       cosmo_scraper(path)
     end
   end
@@ -338,6 +362,10 @@ end
     html_doc = Nokogiri::HTML(html_file)
     raw_author = html_doc.at('.byline-name').text.strip
     date = Time.parse(html_doc.at('.content-info-date').text)
+    if date < Time.now - 5.years
+      puts "too old"
+    end
+
     if a = /\/(?<sign>\w+)-monthly/.match(path)
       author = handle_author(raw_author)
       sign = a[:sign].capitalize
@@ -367,6 +395,36 @@ end
     end
   end
 
+  def self.fetch_mask_horoscopes
+    @mask = Publication.find_by(name: "Mask Magazine")
+    url = 'http://www.maskmagazine.com/contributors/corina-dross'
+    file = open(url).read
+    doc = Nokogiri::HTML(file)
+    raw_author = "Corina Dross"
+    author = handle_author(raw_author)
+    selector = '.published-work a'
+    links = doc.search(selector)
+    paths = links.map {|l| l&.attributes['href'].value }
+    paths.each_with_index do |path, index|
+      match = path.scan(/\w+-\d{4}/)&.first
+      date = Time.now
+      match.nil? ? date = Time.now : date = Time&.parse(match)
+      # date = Time.parse(links[index].text)
+      url = @mask.url + path
+      hash = visit_links(url, '.body')
+      hash.each do |sign, content|
+        zodiac = ZodiacSign.find_by(name: sign)
+        build_horoscope(content, zodiac, author, 30, date, @mask, url)
+      end
+    end
+  end
+
+  def self.visit_links(url, selector)
+    file = open(url).read
+    doc = Nokogiri::HTML(file)
+    text = doc.search(selector)
+    auto_zip(text)
+  end
 
 
 end
