@@ -12,29 +12,6 @@ class Horoscope < ApplicationRecord
 
   validates :content, presence: true, uniqueness: true
 
-  #  i would like to refactor all the zips down to one method, let them all return a hash and then deal with that hash in a uniform way.
-
-  # classwide methods and variables
-
-  # sets up a handy zodiac regex and array
-  @@zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
-  @@zodiac_regex = Regexp.union(@@zodiac_signs)
-  @@downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
-  @@downcase_z_regex = Regexp.union(@@downcase_zodiac)
-  ADVERTISING_PHRASES = [
-    "Download the Astro Guide app by VICE on an iOS device",
-    "to read daily horoscopes personalized for your sun, moon, and rising signs,",
-    "and learn how to apply cosmic events to self care, your friendships, and relationships.",
-    "Read your monthly horoscope here.",
-    "Want these horoscopes sent straight to your inbox?",
-    "Click here to sign up for the newsletter.",
-    "What's in the stars for you in",
-    "Read more stories about astrology:",
-    "These are the signs you're most compatible with romantically:"
-  ]
-  @@advertising_regex = Regexp.union(ADVERTISING_PHRASES)
-
-
   # adds keywords to any horoscope
 
   def handle_keywords
@@ -70,40 +47,7 @@ class Horoscope < ApplicationRecord
     save
   end
 
-
-
-  # builds horoscope
-  def self.horoscope_zip(raw_content)
-    stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
-    headers = raw_content.search('h2')
-    paragraphs = raw_content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
-    a = array.reject { |el| el.length < 42 }
-    a = a.pop(12)
-    h = headers.map { |header| header.text[@@zodiac_regex] }
-    h = h.compact
-    Hash[h.zip(a)]
-  end
-
-
-def self.build_horoscope(content, zodiac, author, interval, date, publication, url)
-  if Horoscope.where(content: content).empty?
-      h = Horoscope.create(
-        zodiac_sign: zodiac,
-        content: content,
-        author: author,
-        range_in_days: interval,
-        start_date: date,
-        publication: publication,
-        original_link: url
-      )
-      author.horoscope_count += 1
-      author.save
-      h.handle_keywords
-  end
-end
-
-  # vice methods
+  # successfully refactored ! now just need to test
 
   def self.fetch_vice_horoscopes
     @vice = Publication.find_by(name: "Vice")
@@ -111,8 +55,8 @@ end
     main_path = '/en_us/topic/horoscopes?page='
     b = @vice.url + main_path
     links = []
-    i = 100
-    while i <= 190
+    i = 1
+    while i <= 3
       puts "compiling"
       links += scraper.compile_links(b, 'a.topics-card__heading-link', i)
       i += 1
@@ -121,10 +65,7 @@ end
   end
 
 
-
-# refactor
-
-  # allure methods
+  # allure methods still needs refactoring
 
   def self.fetch_allure_horoscopes
     @allure = Publication.find_by(name: "Allure")
@@ -142,12 +83,11 @@ end
   end
 
 
-  #  autostraddle methods
+  #  autostraddle methods still needs refactoring
 
   def self.fetch_autostraddle_horoscopes
     @autostraddle = Publication.find_by(name: "Autostraddle")
     scraper = AutoScraper.new(@autostraddle)
-
     selector = ".entry-title a"
     i = 1
     auto_links = []
@@ -161,7 +101,7 @@ end
     scraper.scrape(auto_links)
   end
 
-  #  elle methods
+  #  elle methods still needs refactoring
 
   def self.fetch_elle_horoscopes
     @elle = Publication.find_by(name: "Elle")
@@ -190,7 +130,7 @@ end
 
 
 
-#  cosmo methods
+#  cosmo methods still needs refactoring
 
   def self.fetch_cosmo_horoscopes
     @cosmo = Publication.find_by(name: "Cosmopolitan")
@@ -218,7 +158,7 @@ end
       scraper.scrape(path)
     end
   end
-
+# still needs refactoring
 
   def self.fetch_mask_horoscopes
     @mask = Publication.find_by(name: "Mask Magazine")
@@ -392,3 +332,41 @@ end
   #   return 7 if string == "Weekly"
   #   return 30 if string == "Monthly"
   # end
+
+
+
+  # builds horoscope
+  # def self.horoscope_zip(raw_content)
+  #   stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
+  #   headers = raw_content.search('h2')
+  #   paragraphs = raw_content.search('p')
+  #   array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
+  #   a = array.reject { |el| el.length < 42 }
+  #   a = a.pop(12)
+  #   h = headers.map { |header| header.text[@@zodiac_regex] }
+  #   h = h.compact
+  #   Hash[h.zip(a)]
+  # end
+
+  # vice methods
+
+
+
+  # sets up a handy zodiac regex and array
+  # @@zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
+  # @@zodiac_regex = Regexp.union(@@zodiac_signs)
+  # @@downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
+  # @@downcase_z_regex = Regexp.union(@@downcase_zodiac)
+  # ADVERTISING_PHRASES = [
+  #   "Download the Astro Guide app by VICE on an iOS device",
+  #   "to read daily horoscopes personalized for your sun, moon, and rising signs,",
+  #   "and learn how to apply cosmic events to self care, your friendships, and relationships.",
+  #   "Read your monthly horoscope here.",
+  #   "Want these horoscopes sent straight to your inbox?",
+  #   "Click here to sign up for the newsletter.",
+  #   "What's in the stars for you in",
+  #   "Read more stories about astrology:",
+  #   "These are the signs you're most compatible with romantically:"
+  # ]
+  # @@advertising_regex = Regexp.union(ADVERTISING_PHRASES)
+
