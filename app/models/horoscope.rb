@@ -14,6 +14,8 @@ class Horoscope < ApplicationRecord
   # sets up a handy zodiac regex and array
   @@zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
   @@zodiac_regex = Regexp.union(@@zodiac_signs)
+  @@downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
+  @@downcase_z_regex = Regexp.union(@@downcase_zodiac)
 
 # retrieves the author from the database
   def self.handle_author(author)
@@ -21,6 +23,8 @@ class Horoscope < ApplicationRecord
       author = "Annabel Gat"
     elsif author == "The AstroTwinsThe AstroTwins"
       author = "Tali and Ophira Edut"
+    elsif author == "Aliza Kelly Faragher"
+      author = "Aliza Kelly"
     end
     if Author.where(full_name: author).empty?
       puts "creating author #{author}"
@@ -34,7 +38,7 @@ class Horoscope < ApplicationRecord
 
   # adds keywords to any horoscope
 
-  def self.handle_keywords(horoscope)
+  def handle_keywords
     keywords = [
       "venus",
       "mars",
@@ -56,16 +60,15 @@ class Horoscope < ApplicationRecord
       "moon",
       "sun",
       "sextile",
-      "opposition",
-      "opposite"
+      "opposition"
     ]
-    text = horoscope.content
+    text = content
     regex = /#{Regexp.union(keywords)}/
     matches = text&.downcase&.scan(regex)
     matches&.each do |match|
-      horoscope.keywords << match unless horoscope.keywords.include?(match)
+      keywords << match unless keywords.include?(match)
     end
-    horoscope.save
+    save
   end
 
   def self.compile_links(base_url, selector, query = '')
@@ -82,23 +85,6 @@ class Horoscope < ApplicationRecord
 # adds socials to the author
 
 
-def self.handle_socials(doc,first_selector, publication, second_selector, author)
-# grab the element from the DOM that has the link inside it
-  byline = doc.at(first_selector)
-  # get the href from this element
-  path = byline&.attributes['href'].value
-  # navigate to this link
-  html_file = open(publication.url + path).read
-  html_doc = Nokogiri::HTML(html_file)
-  socials = html_doc.search(second_selector)
-  socials.each do |s|
-    link = s&.attributes['href'].value
-    author.socials << link unless author.socials.include?(link)
-    author.save
-  end
-end
-
-
   # builds horoscope
 def self.build_horoscope(content, zodiac, author, interval, date, publication, url)
   if Horoscope.where(content: content).empty?
@@ -108,13 +94,13 @@ def self.build_horoscope(content, zodiac, author, interval, date, publication, u
         author: author,
         range_in_days: interval,
         start_date: date,
-        publication: @elle,
-        original_url: base_url + path
+        publication: publication,
+        original_link: url
       )
       author.horoscope_count += 1
       author.save
-      handle_keywords(h)
-    end
+      h.handle_keywords
+  end
 end
 
   # vice methods
@@ -124,9 +110,9 @@ end
     @vice = Publication.find_by(name: "Vice")
     # @vice_base_url = 'https://www.vice.com'
     main_path = '/en_us/topic/horoscopes?page='
-    b = @vice_base_url + main_path
+    b = @vice.url + main_path
     vice_links = []
-    i = 1
+    i = 100
     # compiling links to be scraped
     while i <= 190
       vice_links += compile_links(b, 'a.topics-card__heading-link', i)
@@ -141,7 +127,9 @@ end
       html_doc = Nokogiri::HTML(html_file)
 
       #  grabs raw elements from the DOM
-      raw_author = html_doc.at("meta[property='article:author']").attributes['content'].value
+      raw_author = html_doc.at(".contributor__link")&.text
+      raw_author = "Unknown" if raw_author.nil?
+
       date_published = Time.parse(html_doc.at("meta[name='datePublished']").attributes['content'].value)
       raw_content = html_doc.search('.article__body')
       title = html_doc.at("title").text
@@ -157,7 +145,8 @@ end
         range[0] == "Daily" ? date = date_published + 1.days : date = date_published
         horoscope_hash = horoscope_zip(raw_content)
         horoscope_hash.each do |sign, content|
-          build_horoscope(content, sign, author, interval, date, publication, link)
+          zodiac = ZodiacSign.find_by(name: sign)
+          build_horoscope(content, zodiac, author, interval, date, @vice, link)
         end
       end
       #  monthlies are handled separately bc they are separate articles
@@ -170,7 +159,7 @@ end
       end
       #  only do this if author is new and variable exists (is a horoscope author)
       if author
-        handle_socials(html_doc, ".contributor__link", @vice, ".contributor__profile__bio a", author)
+        author.handle_socials(html_doc, ".contributor__link", @vice, ".contributor__profile__bio a")
       end
     end
   end
@@ -235,7 +224,7 @@ end
     content = "#{lede} #{b}"
     # zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
     months = Date::MONTHNAMES.slice(1, 12).map { |x| x.downcase }
-    raw_sign = link.scan(@@zodiac_regex)
+    raw_sign = link.scan(@@downcase_z_regex)
     r = raw_sign[0].capitalize
     sign = ZodiacSign.find_by(name: r)
     month = link.scan(Regexp.union(months))
@@ -243,7 +232,7 @@ end
     date = DateTime.parse("1 #{month} #{year}")
     build_horoscope(content, sign, author, 30, date, @allure, link)
     # handle allure socials
-    handle_socials(doc, ".byline__name-link", @allure, '.social-links a', author)
+    author.handle_socials(doc, ".byline__name-link", @allure, '.social-links a')
   end
 
   #  autostraddle methods
@@ -271,11 +260,11 @@ end
     end
   end
 
-  def self.auto_zip(text)
-    headers = text.search('h2')
-    paragraphs = text.search('p')
-    # autostraddle scrape seems like it will be difficult, come back to this
-  end
+  # def self.auto_zip(text)
+  #   headers = text.search('h2')
+  #   paragraphs = text.search('p')
+  #   # autostraddle scrape seems like it will be difficult, come back to this
+  # end
 
   #  elle methods
 
@@ -315,40 +304,70 @@ end
 
 #  cosmo methods
 
-def self.fetch_cosmo_horoscopes
-  @cosmo = Publication.find_by(name: "Cosmopolitan")
-  cosmo_links = []
-  selector = ".full-item-title"
-  i = 1
-  while i <= 100
-    cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
-    # cosmo_links_links += compile_links(cosmo_infinite_url, selector)
-    html_file = open(cosmo_infinite_url).read
-    html_doc = Nokogiri::HTML(html_file)
-    html_doc.search(selector).each do |element|
-      a = element.attributes['href'].value
-      cosmo_links << a
+  def self.fetch_cosmo_horoscopes
+    @cosmo = Publication.find_by(name: "Cosmopolitan")
+    cosmo_links = []
+    selector = ".full-item-title"
+    i = 1
+    while i <= 100
+      cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
+      # cosmo_links_links += compile_links(cosmo_infinite_url, selector)
+      html_file = open(cosmo_infinite_url).read
+      html_doc = Nokogiri::HTML(html_file)
+      html_doc.search(selector).each do |element|
+        a = element.attributes['href'].value
+        cosmo_links << a
+      end
+      i += 1
     end
-    i += 1
+    puts "number of cosmo links : #{cosmo_links.count}"
+    puts "number of unique cosmo links : #{cosmo_links.uniq.count}"
+    zodiac_regex = /(horoscope|horoscopes|weekly|monthly|daily|week)/
+    @cosmo_links = cosmo_links.reject do |l|
+      zodiac_regex.match(l).nil?
+    end
+    @cosmo_links.each do |path|
+      puts path
+      cosmo_scraper(path)
+    end
   end
-  puts "number of cosmo links : #{cosmo_links.count}"
-  puts "number of unique cosmo links : #{cosmo_links.uniq.count}"
-  zodiac_regex = /(horoscope|horoscopes|weekly|monthly|daily|week)/
-  cosmo_links = cosmo_links.reject do |l|
-    zodiac_regex.match(l).nil?
-  end
-  cosmo_links.each do |path|
-    cosmo_scraper(path)
-  end
-end
 
-def self.cosmo_scraper(path)
-  html_file = open(@cosmo.url + path).read
-  html_doc = Nokogiri::HTML(html_file)
-  binding.pry
-  content = html_doc.search('.body-text').text
+  def self.cosmo_scraper(path)
+    url = @cosmo.url + path
+    html_file = open(url).read
+    html_doc = Nokogiri::HTML(html_file)
+    raw_author = html_doc.at('.byline-name').text.strip
+    date = Time.parse(html_doc.at('.content-info-date').text)
+    if a = /\/(?<sign>\w+)-monthly/.match(path)
+      author = handle_author(raw_author)
+      sign = a[:sign].capitalize
+      zodiac = ZodiacSign.find_by(name: sign)
+      content = html_doc.search('.body-text')&.text&.strip
+      build_horoscope(content, zodiac, author, 30, date, @cosmo, url)
+    elsif /\/monthly-horoscope-\w+\//.match(path)
+      puts "its trash"
+    elsif /sex-love/.match(path)
+      puts "its a sex love weekly"
+    else
+      author = handle_author(raw_author)
+      puts "it's a horoscope easily divided !"
+      body = html_doc.search('.article-body-content')
+      body.search("div").each do |div|
+        div.remove
+      end
+      t = body&.text&.strip&.gsub(/(\s{2}|\n)/, '')&.split("~*~").pop(24)
+      horoscopes = t.values_at(* t.each_index.select {|i| i.odd?})
+      headers = t.values_at(* t.each_index.select {|i| i.even?})
+      h = headers.map(&:capitalize)
+      hash = Hash[h.zip(horoscopes)]
+      hash.each do |sign, content|
+        zodiac = ZodiacSign.find_by(name: sign)
+        build_horoscope(content, zodiac, author, 7, date, @cosmo, url)
+      end
+    end
+  end
 
-end
+
 
 end
 
