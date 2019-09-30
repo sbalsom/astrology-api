@@ -63,7 +63,6 @@ class Horoscope < ApplicationRecord
   end
 
 
-  # allure methods still needs refactoring
 
   def self.fetch_allure_horoscopes
     @allure = Publication.find_by(name: "Allure")
@@ -71,8 +70,7 @@ class Horoscope < ApplicationRecord
     allure_links = scraper.compile_links
     allure_links.each do |link|
       begin
-        file = open(link)
-        doc = Nokogiri::HTML(file)
+        doc = scraper.open_doc(link)
         scraper.scrape(doc, link)
       rescue OpenURI::HTTPError => e
         next if e.message == '404 Not Found'
