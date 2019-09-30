@@ -29,12 +29,12 @@ class AllureScraper < Scraper
     body_paragraphs = doc.search('.article__body p')
     body_paragraphs.shift
     body_paragraphs.pop
-    b = body_paragraphs.text.gsub(@@advertising_regex, '')
+    b = body_paragraphs.text.gsub(@advertising_regex, '')
     "#{lede} #{b}"
   end
 
   def find_sign(link)
-    raw_sign = link.scan(@@downcase_z_regex)
+    raw_sign = link.scan(@downcase_z_regex)
     r = raw_sign[0].capitalize
     ZodiacSign.find_by(name: r)
   end

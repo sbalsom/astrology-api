@@ -21,7 +21,7 @@ class ViceScraper < Scraper
         @author.handle_socials(doc, ".contributor__link", @publication, ".contributor__profile__bio a")
         @author.save
         @sign = find_sign_from_title(doc)
-        @content = content.text.strip.sub(@@advertising_regex, '')
+        @content = content.text.strip.sub(@advertising_regex, '')
         build_horoscope
       else
         puts "not a horoscope I can handle, sorry !"
@@ -42,7 +42,7 @@ class ViceScraper < Scraper
   end
 
   def find_content(doc)
-    raw_content = doc.search('.article__body')
+    doc.search('.article__body')
   end
 
   def determine_type(doc)
@@ -61,21 +61,19 @@ class ViceScraper < Scraper
 
   def find_sign_from_title(doc)
     title = doc.at("title").text
-    sign = title.scan(@@zodiac_regex)
+    sign = title.scan(@zodiac_regex)
     ZodiacSign.find_by(name: sign)
   end
 
   def hzip(content)
-    # stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
     headers = content.search('h2')
     paragraphs = content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@advertising_regex, "") }
     a = array.reject { |el| el.length < 42 }
     a = a.pop(12)
-    h = headers.map { |header| header.text[@@zodiac_regex] }
+    h = headers.map { |header| header.text[@zodiac_regex] }
     h = h.compact
     Hash[h.zip(a)]
   end
 end
-
 

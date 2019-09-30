@@ -4,28 +4,13 @@ require 'open-uri'
 class Scraper < ApplicationRecord
   def initialize(publication)
     @publication = publication
+    @zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
+    @zodiac_regex = Regexp.union(@zodiac_signs)
+    @downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
+    @downcase_z_regex = Regexp.union(@downcase_zodiac)
+    @advertising_regex = /(See All Signs|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.)/
   end
 
-  @@zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
-  @@zodiac_regex = Regexp.union(@@zodiac_signs)
-  @@downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
-  @@downcase_z_regex = Regexp.union(@@downcase_zodiac)
-  # ADVERTISING_PHRASES = [
-  #   "Download the Astro Guide app by VICE on an iOS device",
-  #   "to read daily horoscopes personalized for your sun, moon, and rising signs,",
-  #   "and learn how to apply cosmic events to self care, your friendships, and relationships.",
-  #   "Read your monthly horoscope here.",
-  #   "Want these horoscopes sent straight to your inbox?",
-  #   "Click here to sign up for the newsletter.",
-  #   "What's in the stars for you in \w{4,20}\?",
-  #   "Read more stories about astrology:",
-  #   "These are the signs you're most compatible with romantically:",
-  #   "All times ET.",
-  #   "All times EST."
-  # ]
-  # @@advertising_regex = Regexp.union(ADVERTISING_PHRASES)
-
-  @@advertising_regex = /(Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.)/
 
   def compile_links(base_url, selector, query = '')
     links = []
@@ -98,10 +83,10 @@ end
     # i can maybe use this as a global method, lets see
     headers = content.search('h2')
     paragraphs = content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@advertising_regex, "")}
     a = array.reject { |el| el.length < 42 }
     a = a.pop(12)
-    h = headers.map { |header| header.text[@@zodiac_regex] }
+    h = headers.map { |header| header.text[@zodiac_regex] }
     h = h.compact
     Hash[h.zip(a)]
   end

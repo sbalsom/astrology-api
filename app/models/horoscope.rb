@@ -45,8 +45,6 @@ class Horoscope < ApplicationRecord
     save
   end
 
-  # successfully refactored ! now just need to test
-
   def self.fetch_vice_horoscopes
     @vice = Publication.find_by(name: "Vice")
     scraper = ViceScraper.new(@vice)
@@ -62,8 +60,6 @@ class Horoscope < ApplicationRecord
     scraper.scrape(links)
   end
 
-
-
   def self.fetch_allure_horoscopes
     @allure = Publication.find_by(name: "Allure")
     scraper = AllureScraper.new(@allure)
@@ -77,9 +73,6 @@ class Horoscope < ApplicationRecord
       end
     end
   end
-
-
-  #  autostraddle methods still needs refactoring
 
   def self.fetch_autostraddle_horoscopes
     @autostraddle = Publication.find_by(name: "Autostraddle")
@@ -97,13 +90,9 @@ class Horoscope < ApplicationRecord
     scraper.scrape(auto_links)
   end
 
-  #  elle methods still needs refactoring
-
   def self.fetch_elle_horoscopes
     @elle = Publication.find_by(name: "Elle")
     scraper = ElleScraper.new(@elle)
-    zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
-    zodiac_regex = Regexp.union(zodiac_signs)
     paths = [
       "/horoscopes/daily/",
       "/horoscopes/weekly/",
@@ -113,18 +102,12 @@ class Horoscope < ApplicationRecord
     elle_paths = []
     paths.each do |p|
       url = @elle.url + p
-      elle_paths += compile_links(url, selector)
+      elle_paths += scraper.compile_links(url, selector)
     end
     elle_paths.each do |path|
-      z = zodiac_regex.match(path)&.to_s&.capitalize
-      z.nil? ? next : zodiac = ZodiacSign.find_by(name: z)
-      r = /(daily|weekly|monthly)/.match(path)&.to_s&.capitalize
-      i = interval(r)
-      scraper.scrape(path, zodiac, i)
-      end
+      scraper.scrape(path)
+    end
   end
-
-
 
 #  cosmo methods still needs refactoring
 
