@@ -29,9 +29,9 @@ class Scraper < ApplicationRecord
 
   def compile_links(base_url, selector, query = '')
     links = []
-    html_file = open(base_url + query.to_s).read
-    html_doc = Nokogiri::HTML(html_file)
-    html_doc.search(selector).each do |element|
+    file = open(base_url + query.to_s).read
+    doc = Nokogiri::HTML(file)
+    doc.search(selector).each do |element|
       a = element.attributes['href'].value
       links << a
     end
@@ -50,31 +50,31 @@ class Scraper < ApplicationRecord
     Nokogiri::HTML(file)
   end
 
-  def regex_zip(raw_content)
-    stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
-    headers = raw_content.search('h2')
-    paragraphs = raw_content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
-    a = array.reject { |el| el.length < 42 }
-    a = a.pop(12)
-    h = headers.map { |header| header.text[@@zodiac_regex] }
-    h = h.compact
-    binding.pry
-    Hash[h.zip(a)]
-  end
+  # def regex_zip(raw_content)
+  #   stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
+  #   headers = raw_content.search('h2')
+  #   paragraphs = raw_content.search('p')
+  #   array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
+  #   a = array.reject { |el| el.length < 42 }
+  #   a = a.pop(12)
+  #   h = headers.map { |header| header.text[@@zodiac_regex] }
+  #   h = h.compact
+  #   binding.pry
+  #   Hash[h.zip(a)]
+  # end
 
-  def auto_zip(node)
-    text = node.children.to_enum.map { |x| x.text.strip.gsub(@@advertising_regex, '') }
-    # t = text.children.map { |x| x.text.strip.gsub(@@advertising_regex, '') }
-    t = text.reject { |x| x == "" }
-    t = t.join('~*~')
-    signs = t.scan(/~\*~\w{3,20}~\*~/)
-    horoscopes = t.split(/~\*~\w{3,20}~\*~/).pop(12)
-    h = horoscopes.map {|x| x.gsub(/~\*~/, '')}
-    signs = signs.map {|s| s.gsub(/~\*~/, '')}
-    binding.pry
-    Hash[signs.zip(h)]
-  end
+  # def auto_zip(node)
+  #   text = node.children.to_enum.map { |x| x.text.strip.gsub(@@advertising_regex, '') }
+  #   # t = text.children.map { |x| x.text.strip.gsub(@@advertising_regex, '') }
+  #   t = text.reject { |x| x == "" }
+  #   t = t.join('~*~')
+  #   signs = t.scan(/~\*~\w{3,20}~\*~/)
+  #   horoscopes = t.split(/~\*~\w{3,20}~\*~/).pop(12)
+  #   h = horoscopes.map {|x| x.gsub(/~\*~/, '')}
+  #   signs = signs.map {|s| s.gsub(/~\*~/, '')}
+  #   binding.pry
+  #   Hash[signs.zip(h)]
+  # end
 
   def handle_author(author)
     if author == "Annabel Get"
@@ -103,7 +103,7 @@ class Scraper < ApplicationRecord
     return 99 if string.nil?
   end
 
-  def self.build_horoscope
+  def build_horoscope
   if Horoscope.where(content: @content).empty?
       h = Horoscope.create(
         zodiac_sign: @sign,
@@ -114,11 +114,23 @@ class Scraper < ApplicationRecord
         publication: @publication,
         original_link: @url
       )
-      author.horoscope_count += 1
-      author.save
+      @author.horoscope_count += 1
+      @author.save
       h.handle_keywords
   end
 end
+
+  def hzip(content)
+    # stopwords_regex = /\+(Aries(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Taurus(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Gemini(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Cancer(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Leo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Virgo(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Libra(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Scorpio(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Sagittarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Capricorn(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Aquarius(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?|Pisces(\s\(\w+\s\d{2}\s-\s\w+\s\d{2}\)?)?)\+/
+    headers = content.search('h2')
+    paragraphs = content.search('p')
+    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@@advertising_regex, "")}
+    a = array.reject { |el| el.length < 42 }
+    a = a.pop(12)
+    h = headers.map { |header| header.text[@@zodiac_regex] }
+    h = h.compact
+    Hash[h.zip(a)]
+  end
 
 
 end

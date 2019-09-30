@@ -15,24 +15,35 @@ class AllureScraper < Scraper
 
   def scrape(doc, link)
     raw_author = doc.search('.byline__name-link').text
-    author = handle_author(raw_author)
+    @author = handle_author(raw_author)
+    @content = find_content(doc)
+    @sign = find_sign(link)
+    @date = find_date(link)
+    build_horoscope
+    @author.handle_socials(doc, ".byline__name-link", @publication, '.social-links a')
+    @author.save
+  end
+
+  def find_content(doc)
     lede = doc.search('.content-header__dek').text
     body_paragraphs = doc.search('.article__body p')
     body_paragraphs.shift
     body_paragraphs.pop
     b = body_paragraphs.text.gsub(@@advertising_regex, '')
-    content = "#{lede} #{b}"
-    # zodiac_signs = ZodiacSign.all.map { |sign| sign.name.downcase }
-    months = Date::MONTHNAMES.slice(1, 12).map { |x| x.downcase }
+    "#{lede} #{b}"
+  end
+
+  def find_sign(link)
     raw_sign = link.scan(@@downcase_z_regex)
     r = raw_sign[0].capitalize
-    sign = ZodiacSign.find_by(name: r)
+    ZodiacSign.find_by(name: r)
+  end
+
+  def find_date(link)
+    months = Date::MONTHNAMES.slice(1, 12).map { |x| x.downcase }
     month = link.scan(Regexp.union(months))
     year = link.scan(/\d{4}/)
-    date = DateTime.parse("1 #{month} #{year}")
-    build_horoscope(content, sign, author, 30, date, @allure, link)
-    # handle allure socials
-    author.handle_socials(doc, ".byline__name-link", @allure, '.social-links a')
+    DateTime.parse("1 #{month} #{year}")
   end
 
 end

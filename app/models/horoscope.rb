@@ -15,7 +15,7 @@ class Horoscope < ApplicationRecord
   # adds keywords to any horoscope
 
   def handle_keywords
-    keywords = [
+    kw = [
       "venus",
       "mars",
       "mercury",
@@ -38,9 +38,7 @@ class Horoscope < ApplicationRecord
       "sextile",
       "opposition"
     ]
-    text = content
-    regex = /#{Regexp.union(keywords)}/
-    matches = text&.downcase&.scan(regex)
+    matches = content&.downcase&.scan(Regexp.union(kw))
     matches&.each do |match|
       keywords << match unless keywords.include?(match)
     end
@@ -53,12 +51,12 @@ class Horoscope < ApplicationRecord
     @vice = Publication.find_by(name: "Vice")
     scraper = ViceScraper.new(@vice)
     main_path = '/en_us/topic/horoscopes?page='
-    b = @vice.url + main_path
+    url = @vice.url + main_path
     links = []
     i = 1
     while i <= 3
       puts "compiling"
-      links += scraper.compile_links(b, 'a.topics-card__heading-link', i)
+      links += scraper.compile_links(url, 'a.topics-card__heading-link', i)
       i += 1
     end
     scraper.scrape(links)
