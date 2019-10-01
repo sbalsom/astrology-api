@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_29_100107) do
+ActiveRecord::Schema.define(version: 2019_10_01_160353) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,6 +38,11 @@ ActiveRecord::Schema.define(version: 2019_09_29_100107) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "cut_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "elle_scrapers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -57,6 +62,11 @@ ActiveRecord::Schema.define(version: 2019_09_29_100107) do
     t.index ["author_id"], name: "index_horoscopes_on_author_id"
     t.index ["publication_id"], name: "index_horoscopes_on_publication_id"
     t.index ["zodiac_sign_id"], name: "index_horoscopes_on_zodiac_sign_id"
+  end
+
+  create_table "mask_scrapers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "publications", force: :cascade do |t|

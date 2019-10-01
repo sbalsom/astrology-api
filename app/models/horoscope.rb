@@ -14,9 +14,6 @@ class Horoscope < ApplicationRecord
 
   # adds keywords to any horoscope
 
-  def perform
-  end
-
   def handle_keywords
     kw = [
       "venus",
@@ -141,6 +138,23 @@ class Horoscope < ApplicationRecord
     paths = paths.select { |p| /\d{4}/.match(p) }
     paths.each do |path|
       scraper.scrape(path)
+    end
+  end
+
+  def self.fetch_cut_horoscopes
+    cut = Publication.find_by(name: "The Cut")
+    scraper = CutScraper.new(cut)
+    links = []
+    selector = '.main-article-content a'
+    i = 0
+    while i <= 250
+      #  compile links
+      url = "https://www.thecut.com/tags/astrology/?start=#{i}"
+      links += scraper.compile_links(url, selector)
+      i += 50
+    end
+    links.each do |link|
+      scraper.scrape(link)
     end
   end
 

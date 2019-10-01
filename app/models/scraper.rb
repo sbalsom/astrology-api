@@ -10,9 +10,8 @@ class Scraper < ApplicationRecord
     @zodiac_splitter_regex = Regexp.union(@zodiac_splitter_signs)
     @downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
     @downcase_z_regex = Regexp.union(@downcase_zodiac)
-    @advertising_regex = /((\s{2}|\n)|^Your Key Dates|See All Signs|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.|Subscribe|Want to get the hottest sex positions, the wildest confessions, and the steamiest secrets right to your inbox?|Sign up for our sex newsletter ASAP|)/
+    @advertising_regex = /(The weekly horoscope for the week of \w{3,30}\s\d{1,2} will be here|Read the weekly horoscope for the week of\s\w{3,20}\s\d{1,2}\shere|\s{2}|\n|^Your Key Dates|See All Signs|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.|Subscribe|Want to get the hottest sex positions, the wildest confessions, and the steamiest secrets right to your inbox?|Sign up for our sex newsletter ASAP|)/
   end
-
 # a better way to do regex without escaping / :  %r{}
 #  a way to do multiline regex :
 # regexp = %r{
@@ -36,7 +35,6 @@ class Scraper < ApplicationRecord
     raw_author = "Unknown" if raw_author.nil?
     handle_author(raw_author)
   end
-
 
   def open_doc(url)
     file = open(url).read
