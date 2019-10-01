@@ -42,8 +42,6 @@ class CosmoScraper < Scraper
   end
 
   def handle_weeklies(body)
-    puts "it's a horoscope easily divided !"
-    # i could handle socials first ?
     horoscope_hash = cosmo_zip(body)
     handle_multiples(horoscope_hash)
   end
@@ -60,8 +58,6 @@ class CosmoScraper < Scraper
     h = headers.map(&:capitalize)
     Hash[h.zip(horoscopes)]
   end
-
-  #  two different methods, ill see if one works better
 
   def hzip(body)
     text = body.to_enum.map { |x| x.text.strip.gsub(@advertising_regex, '') }
@@ -86,17 +82,3 @@ class CosmoScraper < Scraper
   end
 
 end
-
-        # socialize(@author, doc)
-  # def azip(content)
-  #   # i can maybe use this as a global method, lets see
-  #   headers = content.search('h2')
-  #   paragraphs = content.search('p')
-  #   array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@advertising_regex, "")}
-  #   a = array.reject { |el| el.length < 42 }
-  #   a = a.pop(12)
-  #   h = headers.map { |header| header.text[@zodiac_regex] }
-  #   h = h.compact
-  #   binding.pry
-  #   Hash[h.zip(a)]
-  # end
