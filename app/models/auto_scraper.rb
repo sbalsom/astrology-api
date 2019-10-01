@@ -3,17 +3,12 @@ class AutoScraper < Scraper
     links.each do |link|
       puts link
       doc = open_doc(link)
-      @author = find_author(doc)
+      @author = find_author(doc, "a[rel='author']").save
       @interval = 7
       @date = Time.parse(doc.at('time').text)
       text = doc.search('.entry-content')
       handle_multiples(text)
     end
-  end
-
-  def find_author(doc)
-    raw_author = doc.at("a[rel='author']").text
-    handle_author(raw_author)
   end
 
   def hzip(node)
@@ -22,8 +17,8 @@ class AutoScraper < Scraper
     t = t.join('~*~')
     signs = t.scan(/~\*~\w{3,20}~\*~/)
     horoscopes = t.split(/~\*~\w{3,20}~\*~/).pop(12)
-    h = horoscopes.map {|x| x.gsub(/~\*~/, '')}
-    signs = signs.map {|s| s.gsub(/~\*~/, '')}
+    h = horoscopes.map { |x| x.gsub(/~\*~/, '') }
+    signs = signs.map { |s| s.gsub(/~\*~/, '') }
     Hash[signs.zip(h)]
   end
 

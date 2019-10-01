@@ -6,11 +6,23 @@ class Scraper < ApplicationRecord
     @publication = publication
     @zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
     @zodiac_regex = Regexp.union(@zodiac_signs)
+    @zodiac_splitter_signs = ZodiacSign.all.map { |sign| sign.name + "~*~" }
+    @zodiac_splitter_regex = Regexp.union(@zodiac_splitter_signs)
     @downcase_zodiac = ZodiacSign.all.map { |sign| sign.name.downcase }
     @downcase_z_regex = Regexp.union(@downcase_zodiac)
-    @advertising_regex = /(See All Signs|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.)/
+    @advertising_regex = /((\s{2}|\n)|^Your Key Dates|See All Signs|Want these horoscopes sent straight to your inbox?|Click here to sign up for the newsletter.|Download the Astro Guide app by VICE on an iOS device |to read daily horoscopes personalized for your sun, moon, and rising signs| Read your monthly horoscope here.|What's in the stars for you in \w{4,20}\?|Read more stories about astrology:|These are the signs you're most compatible with romantically:|All times ET.|All times EST.|Subscribe|Want to get the hottest sex positions, the wildest confessions, and the steamiest secrets right to your inbox?|Sign up for our sex newsletter ASAP|)/
   end
 
+# a better way to do regex without escaping / :  %r{}
+#  a way to do multiline regex :
+# regexp = %r{
+#   start         # some text
+#   \s            # white space char
+#   (group)       # first group
+#   (?:alt1|alt2) # some alternation
+#   end
+# }x
+#  come back to this
 
   def compile_links(base_url, selector, query = '')
     links = []
@@ -23,12 +35,12 @@ class Scraper < ApplicationRecord
     links
   end
 
-  def visit_links(url, selector)
-    file = open(url).read
-    doc = Nokogiri::HTML(file)
-    text = doc.search(selector)
-    auto_zip(text)
+  def find_author(doc, selector)
+    raw_author = doc.at(selector)&.text&.strip
+    raw_author = "Unknown" if raw_author.nil?
+    handle_author(raw_author)
   end
+
 
   def open_doc(url)
     file = open(url).read
@@ -60,6 +72,14 @@ class Scraper < ApplicationRecord
     return 7 if string == "Weekly"
     return 30 if string == "Monthly"
     return 99 if string.nil?
+  end
+
+  def handle_multiples(horoscope_hash)
+    horoscope_hash.each do |sign, content|
+      @content = content
+      @sign = ZodiacSign.find_by(name: sign)
+      build_horoscope
+    end
   end
 
   def build_horoscope
@@ -119,4 +139,9 @@ end
   #   signs = signs.map {|s| s.gsub(/~\*~/, '')}
   #   binding.pry
   #   Hash[signs.zip(h)]
+  # end
+  # def visit_links(url, selector)
+  #   file = open(url).read
+  #   doc = Nokogiri::HTML(file)
+  #   doc.search(selector)
   # end

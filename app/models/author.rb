@@ -27,11 +27,9 @@ class Author < ApplicationRecord
   # end
 end
 
-def handle_simple_socials(selector, doc)
-  s = doc.search(selector)
-      s.each do |social|
-        link = social&.attributes['href'].value
-        socials << link unless socials.include?(link)
+def handle_simple_socials(socials = [])
+      socials.each do |social|
+        socials << social unless socials.include?(social)
     end
 end
 end
