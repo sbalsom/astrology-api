@@ -25,15 +25,11 @@ class Scraper < ApplicationRecord
 #  come back to this
 
   def compile_links(base_url, selector, query = '')
-    links = []
-    file = open(base_url + query.to_s).read
-    doc = Nokogiri::HTML(file)
-    doc.search(selector).each do |element|
-      a = element.attributes['href'].value
-      links << a
-    end
-    links
+    doc = open_doc(base_url + query.to_s)
+    paths = doc.search(selector)
+    paths.map { |l| l&.attributes['href']&.value }
   end
+
 
   def find_author(doc, selector)
     raw_author = doc.at(selector)&.text&.strip
@@ -99,17 +95,17 @@ class Scraper < ApplicationRecord
   end
 end
 
-  def hzip(content)
-    # i can maybe use this as a global method, lets see
-    headers = content.search('h2')
-    paragraphs = content.search('p')
-    array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@advertising_regex, "")}
-    a = array.reject { |el| el.length < 42 }
-    a = a.pop(12)
-    h = headers.map { |header| header.text[@zodiac_regex] }
-    h = h.compact
-    Hash[h.zip(a)]
-  end
+  # def hzip(content)
+  #   # i can maybe use this as a global method, lets see
+  #   headers = content.search('h2')
+  #   paragraphs = content.search('p')
+  #   array = paragraphs.to_enum.map {|child| child.text.strip.gsub(@advertising_regex, "")}
+  #   a = array.reject { |el| el.length < 42 }
+  #   a = a.pop(12)
+  #   h = headers.map { |header| header.text[@zodiac_regex] }
+  #   h = h.compact
+  #   Hash[h.zip(a)]
+  # end
 
 
 end
@@ -145,3 +141,15 @@ end
   #   doc = Nokogiri::HTML(file)
   #   doc.search(selector)
   # end
+
+
+    # paths.each do |p|
+    #   links << p&.attributes['href']&.value
+    # end
+    # binding.pry
+    # # paths = links.map {|l| l&.attributes&['href']&.value }
+    # doc.search(selector).each do |element|
+    #   a = element&.attributes['href']&.value
+    #   links << a
+    # end
+    # links

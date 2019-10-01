@@ -21,16 +21,16 @@ class CosmoScraper < Scraper
     elsif %r{/monthly-horoscope-\w+/}.match(path)
       puts "its trash. go see: #{@url}"
     elsif %r{sex-love}.match(path)
-        socialize(@author, doc)
-        @interval = 7
-        body = doc.search('.article-body-content p')
-        handle_sex_love(body)
+      socialize(@author, doc)
+      @interval = 7
+      body = doc.search('.article-body-content p')
+      handle_sex_love(body)
     elsif %r{weekly-horoscope-\w{3,20}-\d{1,2}-\d{4}}.match(path)
-        socialize(@author, doc)
-        @interval = 7
-        body = doc.search('.article-body-content')
-        body.search('div').each { |div| div.remove }
-        handle_weeklies(body)
+      socialize(@author, doc)
+      @interval = 7
+      body = doc.search('.article-body-content')
+      body.search('div').each { |div| div.remove }
+      handle_weeklies(body)
     end
   end
 

@@ -49,7 +49,7 @@ class Horoscope < ApplicationRecord
     vice = Publication.find_by(name: "Vice")
     scraper = ViceScraper.new(vice)
     main_path = '/en_us/topic/horoscopes?page='
-    url = @vice.url + main_path
+    url = vice.url + main_path
     links = []
     i = 1
     #  check before final push to make sure all 190 pages are working
@@ -110,8 +110,6 @@ class Horoscope < ApplicationRecord
     end
   end
 
-#  cosmo methods still needs refactoring
-
   def self.fetch_cosmo_horoscopes
     cosmo = Publication.find_by(name: "Cosmopolitan")
     scraper = CosmoScraper.new(cosmo)
@@ -134,37 +132,31 @@ class Horoscope < ApplicationRecord
 # still needs refactoring
 
   def self.fetch_mask_horoscopes
-    @mask = Publication.find_by(name: "Mask Magazine")
-    scraper = Scraper.new(@mask)
-
-    url = 'http://www.maskmagazine.com/contributors/corina-dross'
-    file = open(url).read
-    doc = Nokogiri::HTML(file)
-    raw_author = "Corina Dross"
-    author = handle_author(raw_author)
+    mask = Publication.find_by(name: "Mask Magazine")
+    scraper = MaskScraper.new(mask)
+    initial_url = 'http://www.maskmagazine.com/contributors/corina-dross'
     selector = '.published-work a'
-    links = doc.search(selector)
-    paths = links.map {|l| l&.attributes['href'].value }
-    paths.each_with_index do |path, index|
-      match = path.scan(/\w+-\d{4}/)&.first
-      date = Time.now
-      match.nil? ? date = Time.now : date = Time&.parse(match)
-      # date = Time.parse(links[index].text)
-      url = @mask.url + path
-      hash = scraper.visit_links(url, '.body')
-      hash.each do |sign, content|
-        zodiac = ZodiacSign.find_by(name: sign)
-        build_horoscope(content, zodiac, author, 30, date, @mask, url)
-      end
+    paths = scraper.compile_links(initial_url, selector)
+    paths = paths.select { |p| /\d{4}/.match(p) }
+    paths.each do |path|
+      scraper.scrape(path)
     end
   end
 
-
-
 end
 
+# this syntax is shorter , maybe use for global method ?
+    # paths = links.map {|l| l&.attributes['href'].value }
 
 # I want to add to my database :
+
+# jessica lanyadoo
+# the cut - weekly
+# teen vogue weekly
+# astrology zone
+# cafe astrology
+# channi nicholas
+# refinery 29
 
 # an api view for authors
 # more keywords for each horoscope (emotions, other)

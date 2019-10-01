@@ -1,4 +1,5 @@
 class AutoScraper < Scraper
+
   def scrape(links)
     links.each do |link|
       puts link
