@@ -10,6 +10,7 @@ gem 'rails', '5.2.3'
 gem 'redis'
 gem 'pundit'
 gem "watir", "~> 6.16"
+gem 'sidekiq'
 
 
 gem 'autoprefixer-rails'

@@ -14,6 +14,9 @@ class Horoscope < ApplicationRecord
 
   # adds keywords to any horoscope
 
+  def perform
+  end
+
   def handle_keywords
     kw = [
       "venus",
@@ -128,8 +131,6 @@ class Horoscope < ApplicationRecord
       scraper.scrape(path)
     end
   end
-
-# still needs refactoring
 
   def self.fetch_mask_horoscopes
     mask = Publication.find_by(name: "Mask Magazine")

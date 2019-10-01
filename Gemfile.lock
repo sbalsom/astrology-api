@@ -55,6 +55,7 @@ GEM
       rake (< 13.0)
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
+    connection_pool (2.2.2)
     crass (1.0.4)
     devise (4.7.1)
       bcrypt (~> 3.0)
@@ -111,6 +112,8 @@ GEM
     pundit (2.1.0)
       activesupport (>= 3.0.0)
     rack (2.0.7)
+    rack-protection (2.0.7)
+      rack
     rack-proxy (0.6.5)
       rack
     rack-test (1.1.0)
@@ -160,6 +163,11 @@ GEM
     selenium-webdriver (3.142.4)
       childprocess (>= 0.5, < 3.0)
       rubyzip (~> 1.2, >= 1.2.2)
+    sidekiq (6.0.0)
+      connection_pool (>= 2.2.2)
+      rack (>= 2.0.0)
+      rack-protection (>= 2.0.0)
+      redis (>= 4.1.0)
     simple_form (4.1.0)
       actionpack (>= 5.0)
       activemodel (>= 5.0)
@@ -218,6 +226,7 @@ DEPENDENCIES
   rails (= 5.2.3)
   redis
   sassc-rails
+  sidekiq
   simple_form
   spring
   spring-watcher-listen (~> 2.0.0)
