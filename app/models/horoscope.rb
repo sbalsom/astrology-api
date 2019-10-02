@@ -4,13 +4,15 @@ require 'pry-byebug'
 require 'net/http'
 require 'watir'
 require_relative 'scraper'
+require 'net/http'
+require 'json'
 
 class Horoscope < ApplicationRecord
   belongs_to :publication
   belongs_to :author
   belongs_to :zodiac_sign
 
-  validates :content, presence: true, uniqueness: true
+  validates :content, presence: true, uniqueness: true, length: { minimum: 100 }
 
   # adds keywords to any horoscope
 
@@ -148,7 +150,6 @@ class Horoscope < ApplicationRecord
     selector = '.main-article-content a'
     i = 0
     while i <= 250
-      #  compile links
       url = "https://www.thecut.com/tags/astrology/?start=#{i}"
       links += scraper.compile_links(url, selector)
       i += 50
@@ -158,12 +159,29 @@ class Horoscope < ApplicationRecord
     end
   end
 
+  def self.fetch_teen_vogue_horoscopes
+    teen_vogue = Publication.find_by(name: "Teen Vogue")
+    scraper = TeenVogueScraper.new(teen_vogue)
+    i = 1
+    while i < 10
+      url = "https://www.teenvogue.com/api/search?page=#{i}&size=10&sort=publishDate%20desc&types=%22article%22%2C%22gallery%22&categoryIds=%225a4d5863aed9070f9ecfbf4a%22&tags=%22weekly%20horoscopes%22"
+      uri = URI(url)
+      response = Net::HTTP.get(uri)
+      results = JSON.parse(response)
+      hits = results['hits']['hits']
+      hits.each do |hit|
+        scraper.api_scrape(hit)
+      end
+    i += 1
+    end
+  end
+
+
 end
 
 # I want to add to my database :
 
-# jessica lanyadoo
-# the cut - weekly
+# jessica lanyadoo (offset pagination hard to scrape ?)
 # teen vogue weekly
 # astrology zone
 # cafe astrology
