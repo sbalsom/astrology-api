@@ -1,6 +1,6 @@
 ## The Astrology API
 
-This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for an sort horoscopes by publication, date, author name, keywords, sign, and other attributes. Anyone is free to use this information in their application, and is kindly asked to include the author's name along with any horoscopes written by that author.
+This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and other attributes. Anyone is free to use this information in their application, and is kindly asked to include the author's name along with any horoscopes written by that author.
 
 ## A note about Copyright
 
