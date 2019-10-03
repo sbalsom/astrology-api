@@ -1,6 +1,20 @@
 # require 'pry-byebug'
 class ViceScraper < Scraper
 
+  def start
+    main_path = '/en_us/topic/horoscopes?page='
+    url = vice.url + main_path
+    links = []
+    i = 1
+    #  check before final push to make sure all 190 pages are working
+    while i <= 190
+      puts "compiling"
+      links += compile_links(url, 'a.topics-card__heading-link', i)
+      i += 1
+    end
+    scrape(links)
+  end
+
   def scrape(links)
     links.each do |link|
       @url = link

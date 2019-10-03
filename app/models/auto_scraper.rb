@@ -1,5 +1,20 @@
 class AutoScraper < Scraper
 
+  def start
+    #  this part can be in the scraper
+    selector = ".entry-title a"
+    i = 1
+    auto_links = []
+    while i <= 3
+      topic_url = "https://www.autostraddle.com/tag/queer-horoscopes/page/#{i}/"
+      auto_links += scraper.compile_links(topic_url, selector)
+      puts i
+      i += 1
+    end
+    auto_links = auto_links.select { |link| /queer-horoscopes/.match(link) }
+    scraper.scrape(auto_links)
+  end
+
   def scrape(links)
     links.each do |link|
       puts link

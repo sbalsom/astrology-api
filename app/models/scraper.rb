@@ -29,7 +29,6 @@ class Scraper < ApplicationRecord
     paths.map { |l| l&.attributes['href']&.value }
   end
 
-
   def find_author(doc, selector)
     raw_author = doc.at(selector)&.text&.strip
     raw_author = "Unknown" if raw_author.nil?
@@ -61,7 +60,7 @@ class Scraper < ApplicationRecord
     author
   end
 
-   def interval(string)
+  def interval(string)
     return 1 if string == "Daily"
     return 7 if string == "Weekly"
     return 30 if string == "Monthly"

@@ -1,5 +1,19 @@
 class CutScraper < Scraper
 
+  def start
+    links = []
+    selector = '.main-article-content a'
+    i = 0
+    while i <= 250
+      url = "https://www.thecut.com/tags/astrology/?start=#{i}"
+      links += compile_links(url, selector)
+      i += 50
+    end
+    links.each do |link|
+      scrape(link)
+    end
+  end
+
   def scrape(link)
     return unless /(weekly|week)/.match(link)
 

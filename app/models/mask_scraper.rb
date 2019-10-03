@@ -1,5 +1,15 @@
 class MaskScraper < Scraper
 
+  def start
+    initial_url = 'http://www.maskmagazine.com/contributors/corina-dross'
+    selector = '.published-work a'
+    paths = compile_links(initial_url, selector)
+    paths = paths.select { |p| /\d{4}/.match(p) }
+    paths.each do |path|
+      scrape(path)
+    end
+  end
+
   def scrape(path)
     raw_author = "Corina Dross"
     @author = handle_author(raw_author)

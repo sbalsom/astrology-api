@@ -1,5 +1,16 @@
 class AllureScraper < Scraper
 
+  def start
+    allure_links = compile_links
+    allure_links.each do |link|
+    doc = open_doc(link)
+    scrape(doc, link)
+    rescue OpenURI::HTTPError => e
+        next if e.message == '404 Not Found'
+    end
+    end
+  end
+
   def compile_links
     links = []
     year = Time.now.year

@@ -1,5 +1,20 @@
 class TeenVogueScraper < Scraper
 
+  def start
+    i = 1
+    while i < 10
+      url = "https://www.teenvogue.com/api/search?page=#{i}&size=10&sort=publishDate%20desc&types=%22article%22%2C%22gallery%22&categoryIds=%225a4d5863aed9070f9ecfbf4a%22&tags=%22weekly%20horoscopes%22"
+      uri = URI(url)
+      response = Net::HTTP.get(uri)
+      results = JSON.parse(response)
+      hits = results['hits']['hits']
+      hits.each do |hit|
+        api_scrape(hit)
+      end
+    i += 1
+    end
+  end
+
   def api_scrape(hit)
     @date = Time.parse(hit['_source']['createdAt'])
     @interval = 7
@@ -17,7 +32,6 @@ class TeenVogueScraper < Scraper
   end
 
   def find_author_in_api(hit)
-    begin
       a = hit['_source']['_embedded']['contributorsAuthor'].first
       a.nil? ? raw_author = "Unknown" : raw_author = a['fields']['name']
       author = handle_author(raw_author)

@@ -1,5 +1,22 @@
 class CosmoScraper < Scraper
 
+  def start
+    cosmo_links = []
+    i = 1
+    while i <= 70
+      selector = ".full-item-title"
+      cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
+      cosmo_links += scraper.compile_links(cosmo_infinite_url, selector)
+      i += 1
+    end
+    title_regex = /(horoscope|horoscopes|weekly|monthly|daily|week)/
+    cosmo_links = cosmo_links.reject { |l| title_regex.match(l).nil? }
+    cosmo_links.each_with_index do |path, index|
+      puts "#{index}/#{cosmo_links.length}"
+      scraper.scrape(path)
+    end
+  end
+
   def scrape(path)
     puts path
     @url = @publication.url + path

@@ -1,5 +1,22 @@
 class ElleScraper < Scraper
 
+  def start
+    paths = [
+      "/horoscopes/daily/",
+      "/horoscopes/weekly/",
+      "/horoscopes/monthly/"
+    ]
+    selector = '.simple-item-title'
+    elle_paths = []
+    paths.each do |p|
+      url = @elle.url + p
+      elle_paths += compile_links(url, selector)
+    end
+    elle_paths.each do |path|
+      scrape(path)
+    end
+  end
+
   def scrape(path)
     puts path
     @sign = find_sign(path)
