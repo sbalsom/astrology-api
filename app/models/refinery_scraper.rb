@@ -1,11 +1,14 @@
 class RefineryScraper < Scraper
+
   def start
     url = "https://www.refinery29.com/en-gb/horoscopes?&page="
+    paths = []
     i = 1
     while i < 13
       @url = url + i.to_s
-      compile_links(@url)
+      paths += compile_links(@url)
     end
+    scrape(paths)
   end
 
   def compile_links(url)
@@ -13,7 +16,10 @@ class RefineryScraper < Scraper
     paths = doc.search('.card a')
                .to_enum
                .map { |x| x['href'] }
-    binding.pry
     paths
+  end
+
+  def scrape
+
   end
 end
