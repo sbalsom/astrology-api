@@ -12,8 +12,8 @@ class Horoscope < ApplicationRecord
   belongs_to :author
   belongs_to :zodiac_sign
 
-  validates :content, presence: true, uniqueness: true, length: { minimum: 100 }
-
+  validates :content, presence: true, uniqueness: true
+  validates :original_link, presence: true
   # adds keywords to any horoscope
 
   def handle_keywords
@@ -46,6 +46,19 @@ class Horoscope < ApplicationRecord
     end
     save
   end
+
+  def monthly?
+    range_in_days == 30
+  end
+
+  def weekly?
+    range_in_days == 7
+  end
+
+  def daily?
+    range_in_days == 1
+  end
+
 
   def self.fetch_vice_horoscopes
     vice = Publication.find_by(name: "Vice")

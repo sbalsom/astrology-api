@@ -1,4 +1,5 @@
 .navbar-lewagon {
+  height: 80px;
   justify-content: space-between;
   background: white;
 }
@@ -9,4 +10,13 @@
 
 .navbar-lewagon .navbar-brand img {
   width: 40px;
+}
+
+.nav-bar__logo {
+  border-radius: 50%;
+    height: 50px;
+    background-image: asset-url('zodiac-2.jpg');
+    width: 50px;
+    background-size: cover;
+    background-position: center;
 }

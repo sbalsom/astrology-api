@@ -16,6 +16,7 @@ class CutScraper < Scraper
 
   def scrape(link)
     return unless /(weekly|week)/.match(link)
+    return if /gifs/.match(link)
 
     puts "did not return"
     @url = "http:" + link

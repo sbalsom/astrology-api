@@ -8,10 +8,11 @@ class Author < ApplicationRecord
   validates :full_name, presence: true, uniqueness: true
 
   def handle_socials(doc, first_selector, publication, second_selector)
+    scraper = Scraper.new(publication)
     byline = doc.at(first_selector)
     unless byline&.attributes.nil?
       path = byline&.attributes['href'].value
-      second_doc = open_doc(publication.url + path)
+      second_doc = scraper.open_doc(publication.url + path)
       links = second_doc.search(second_selector)
       links.each do |s|
         link = s&.attributes['href'].value

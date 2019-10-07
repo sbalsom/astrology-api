@@ -3,7 +3,7 @@ class ViceScraper < Scraper
 
   def start
     main_path = '/en_us/topic/horoscopes?page='
-    url = vice.url + main_path
+    url = @publication.url + main_path
     links = []
     i = 1
     #  check before final push to make sure all 190 pages are working

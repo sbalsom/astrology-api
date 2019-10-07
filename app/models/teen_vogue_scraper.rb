@@ -41,8 +41,7 @@ class TeenVogueScraper < Scraper
       author.save
       author
     rescue
-      binding.pry
-    end
+      puts "There was an error"
   end
 
   def find_sign_in_api(item)
@@ -54,6 +53,3 @@ class TeenVogueScraper < Scraper
   end
 
 end
-
-# ['hed']
-# ['meta']['createdAt']

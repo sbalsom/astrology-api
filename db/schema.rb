@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_03_150601) do
+ActiveRecord::Schema.define(version: 2019_10_07_123002) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,6 +59,8 @@ ActiveRecord::Schema.define(version: 2019_10_03_150601) do
     t.integer "range_in_days"
     t.string "keywords", default: [], array: true
     t.string "original_link"
+    t.integer "word_count"
+    t.string "mood"
     t.index ["author_id"], name: "index_horoscopes_on_author_id"
     t.index ["publication_id"], name: "index_horoscopes_on_publication_id"
     t.index ["zodiac_sign_id"], name: "index_horoscopes_on_zodiac_sign_id"
@@ -109,6 +111,7 @@ ActiveRecord::Schema.define(version: 2019_10_03_150601) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "admin", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

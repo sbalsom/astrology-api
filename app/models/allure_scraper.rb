@@ -6,8 +6,7 @@ class AllureScraper < Scraper
     doc = open_doc(link)
     scrape(doc, link)
     rescue OpenURI::HTTPError => e
-        next if e.message == '404 Not Found'
-    end
+      next if e.message == '404 Not Found'
     end
   end
 
@@ -30,6 +29,8 @@ class AllureScraper < Scraper
     @content = find_content(doc)
     @sign = find_sign(link)
     @date = find_date(link)
+    @url = link
+    @interval = 30
     build_horoscope
     @author.handle_socials(doc, ".byline__name-link", @publication, '.social-links a')
     @author.save

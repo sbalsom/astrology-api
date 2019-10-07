@@ -7,20 +7,22 @@ class AutoScraper < Scraper
     auto_links = []
     while i <= 3
       topic_url = "https://www.autostraddle.com/tag/queer-horoscopes/page/#{i}/"
-      auto_links += scraper.compile_links(topic_url, selector)
+      auto_links += compile_links(topic_url, selector)
       puts i
       i += 1
     end
     auto_links = auto_links.select { |link| /queer-horoscopes/.match(link) }
-    scraper.scrape(auto_links)
+    scrape(auto_links)
   end
 
   def scrape(links)
     links.each do |link|
       puts link
       doc = open_doc(link)
-      @author = find_author(doc, "a[rel='author']").save
+      @author = find_author(doc, "a[rel='author']")
+      @author.save
       @interval = 7
+      @url = link
       @date = Time.parse(doc.at('time').text)
       text = doc.search('.entry-content')
       handle_multiples(text)
@@ -41,7 +43,6 @@ class AutoScraper < Scraper
   def handle_multiples(text)
     hash = hzip(text)
     hash.each do |sign, content|
-      @url = link
       @content = content
       @sign = ZodiacSign.find_by(name: sign)
       build_horoscope

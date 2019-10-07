@@ -23,6 +23,35 @@ class Scraper < ApplicationRecord
 # }x
 #  come back to this
 
+  def analyze_content(content)
+    analyzer = SentimentLib::Analyzer.new
+    score = analyzer.analyze(content)
+    @mood = verbalize(score)
+  end
+
+  def verbalize(score)
+    case score
+    when -20..-16
+      return "Turbulent"
+    when -15..-11
+      return "Difficult"
+    when -10..-6
+      return "Trying"
+    when -5..-1
+      return "Worrisome"
+    when 0
+      return "Neutral"
+    when 1..5
+      return "Reassuring"
+    when 6..10
+      return "Promising"
+    when 11..20
+      return "Life-affirming"
+    else
+      return "Off the charts"
+    end
+  end
+
   def compile_links(base_url, selector, query = '')
     doc = open_doc(base_url + query.to_s)
     paths = doc.search(selector)
@@ -44,6 +73,8 @@ class Scraper < ApplicationRecord
     if author == "Annabel Get"
       author = "Annabel Gat"
     elsif author == "The AstroTwinsThe AstroTwins"
+      author = "Tali and Ophira Edut"
+    elsif author == "The AstroTwins"
       author = "Tali and Ophira Edut"
     elsif author == "Aliza Kelly Faragher"
       author = "Aliza Kelly"
@@ -76,6 +107,8 @@ class Scraper < ApplicationRecord
   end
 
   def build_horoscope
+    analyze_content(@content)
+    @content = "#{@content.truncate(100)}... #{@content.split(' ').count} words by #{@author.full_name}. Read the original at #{@url}"
   if Horoscope.where(content: @content).empty?
       h = Horoscope.create(
         zodiac_sign: @sign,
@@ -84,7 +117,9 @@ class Scraper < ApplicationRecord
         range_in_days: @interval,
         start_date: @date,
         publication: @publication,
-        original_link: @url
+        original_link: @url,
+        word_count: @content.split(' ').count,
+        mood: @mood
       )
       @author.horoscope_count += 1
       @author.save

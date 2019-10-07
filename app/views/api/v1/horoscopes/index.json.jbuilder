@@ -1,3 +1,3 @@
 json.array! @horoscopes do |horoscope|
-  json.extract! horoscope, :id, :author, :publication, :content, :keywords, :zodiac_sign, :start_date, :range_in_days
+  json.extract! horoscope, :id, :author, :publication, :content, :keywords, :zodiac_sign, :start_date, :range_in_days, :mood
 end

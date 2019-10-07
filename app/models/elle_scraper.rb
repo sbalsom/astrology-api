@@ -9,7 +9,7 @@ class ElleScraper < Scraper
     selector = '.simple-item-title'
     elle_paths = []
     paths.each do |p|
-      url = @elle.url + p
+      url = @publication.url + p
       elle_paths += compile_links(url, selector)
     end
     elle_paths.each do |path|
@@ -24,7 +24,8 @@ class ElleScraper < Scraper
     @interval = interval(type)
     @url = @publication.url + path
     doc = open_doc(@url)
-    @author = find_author(doc, ".byline-name").save
+    @author = find_author(doc, ".byline-name")
+    @author.save
     @content = doc.search('.body-text').text.gsub(@advertising_regex, '')
     @date = Time.parse(doc.at(".content-info-date").text)
     build_horoscope
