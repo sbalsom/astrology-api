@@ -15,13 +15,12 @@ Please contact me at sbalsom@protonmail.com with any questions, comments, sugges
 # How to use the API
 
 Horoscopes, publications, and authors are indexed at their respective endpoints :
-` code `
-``` code ```
 
-```/api/v1/horoscopes
 ```
-
-```  /api/v1/authors/ 
+/api/v1/horoscopes
+```
+```
+/api/v1/authors/ 
 ```
 
 ``` /api/v1/publications/
