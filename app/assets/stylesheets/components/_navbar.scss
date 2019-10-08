@@ -1,7 +1,7 @@
 .navbar-lewagon {
-  height: 80px;
-  justify-content: space-between;
-  background: white;
+  height: 300px;
+  justify-content: center;
+  background: black;
 }
 
 .navbar-lewagon .navbar-collapse {
@@ -14,9 +14,10 @@
 
 .nav-bar__logo {
   border-radius: 50%;
-    height: 50px;
+    height: 200px;
     background-image: asset-url('zodiac-2.jpg');
-    width: 50px;
+    width: 200px;
     background-size: cover;
     background-position: center;
 }
+
