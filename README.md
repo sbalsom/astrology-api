@@ -23,21 +23,26 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 /api/v1/authors/ 
 ```
 
-``` /api/v1/publications/
+``` 
+/api/v1/publications/
 ```
 
 And a single instance of an author, pulication, or horoscope can be viewed by its id :
 
-```/api/v1/horoscopes/:id
+```
+/api/v1/horoscopes/:id
 ```
 
-```  /api/v1/authors/:id 
+```
+/api/v1/authors/:id
 ```
 
-``` /api/v1/horoscopes/:id
+```
+/api/v1/horoscopes/:id
 ```
 
-``` /api/v1/publications/:id
+``` 
+/api/v1/publications/:id
 ```
 
 
