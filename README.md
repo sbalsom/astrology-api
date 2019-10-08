@@ -16,6 +16,7 @@ Please contact me at sbalsom@protonmail.com with any questions, comments, sugges
 
 Horoscopes, publications, and authors are indexed at their respective endpoints :
 ` code `
+``` code ```
 
 ```/api/v1/horoscopes
 ```
