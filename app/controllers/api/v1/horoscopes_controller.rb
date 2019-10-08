@@ -5,7 +5,6 @@ class Api::V1::HoroscopesController < Api::V1::BaseController
   end
 
   def index
-    # either scrape directly here or call the model which will have a method to populate itself
     @horoscopes = policy_scope(Horoscope)
   end
 

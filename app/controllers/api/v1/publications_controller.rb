@@ -1,8 +1,15 @@
 class Api::V1::PublicationsController < Api::V1::BaseController
-  before_action :set_publication, only: [ :show ]
+  before_action :set_publication, only: [:show]
 
   def index
-    @publications = policy_scope(Publication)
+    if params
+      logger.debug "The params are #{params}"
+      @publications = policy_scope(Publication).where(name: params[:name])
+    else
+      @publications = policy_scope(Publication).first(5)
+      # @publications = policy_scope(Publication)
+    end
+
   end
 
   def show

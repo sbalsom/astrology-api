@@ -7,3 +7,4 @@ json.array! @publications do |publication|
     json.extract! horoscope, :id, :author, :content, :zodiac_sign
   end
 end
+

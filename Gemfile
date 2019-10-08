@@ -10,7 +10,6 @@ gem 'rails', '5.2.3'
 gem 'redis'
 gem 'sidekiq-failures', '~> 1.0'
 gem 'pundit'
-gem "watir", "~> 6.16"
 gem 'sidekiq'
 gem 'sentiment_lib'
 gem 'sinatra', '>= 2.0.0.beta2', require: false
