@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   end
   devise_for :users
   root to: 'pages#home'
-  namespace :api, defaults: { format: :json } do
+  namespace :api do
     namespace :v1 do
       resources :horoscopes, only: [ :index, :show ]
       resources :publications, only: [ :index, :show ]
@@ -14,3 +14,9 @@ Rails.application.routes.draw do
   end
 end
 
+
+# namespace :api do
+#   namespace :v1 do
+#     resources :jobs, only: [:index]
+#   end
+# end

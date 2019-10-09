@@ -5,8 +5,9 @@ class Api::V1::AuthorsController < Api::V1::BaseController
   end
 
   def index
+    paginate json: policy_scope(Author).by_date, per_page: 25
     # either scrape directly here or call the model which will have a method to populate itself
-    @authors = policy_scope(Author)
+    # @authors = policy_scope(Author)
   end
 
   private

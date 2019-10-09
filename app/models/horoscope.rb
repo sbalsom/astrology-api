@@ -13,6 +13,8 @@ class Horoscope < ApplicationRecord
 
   validates :content, presence: true, uniqueness: true
   validates :original_link, presence: true
+
+  scope :by_date, -> { order(created_at: :desc) }
   # adds keywords to any horoscope
 
   def handle_keywords

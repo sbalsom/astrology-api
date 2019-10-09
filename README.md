@@ -54,7 +54,11 @@ And a single instance of an author, pulication, or horoscope can be viewed by it
 # cafe astrology - there is a lot going on here -- maybe come back to this
 # channi nicholas --
 # refinery 29
-
+# Add weekly and daily fetch methods to sidekiq
+# in controllers deal with params
+# use a paginator to paginate pages
+# write about all this in readme
+# finally deploy to heroku
 
 # an api view for authors
 # more keywords for each horoscope (emotions, other)
@@ -63,6 +67,7 @@ And a single instance of an author, pulication, or horoscope can be viewed by it
 # more associations : author has many publications, through horoscopes
 
 
-# Vice : 190 pages total going back to 2015
 
- -->
+# Vice : 190 pages total going back to 2015 -->
+
+

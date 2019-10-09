@@ -11,15 +11,20 @@ gem 'redis'
 # sentiment analyzes horoscopes content
 gem 'sentiment_lib'
 
-# i don't know what the sinatra gem is doing here
+# i don't know what the sinatra gem is doing here honestly
 gem 'sinatra', '>= 2.0.0.beta2', require: false
 
 # pagination gems
-
+gem 'active_model_serializers'
 gem 'will_paginate'
-gem 'kaminari'
-gem 'pagy'
-gem 'pager_api'
+gem 'api-pagination'
+
+# gem 'api-pagination'
+
+# gem 'will_paginate'
+# gem 'kaminari'
+# gem 'pagy'
+# gem 'pager_api'
 
 #  setup gems for rails app
 gem 'bootsnap', require: false

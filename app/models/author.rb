@@ -7,6 +7,8 @@ class Author < ApplicationRecord
   has_many :publications, through: :horoscopes
   validates :full_name, presence: true, uniqueness: true
 
+  scope :by_date, -> { order(created_at: :desc) }
+
   def handle_socials(doc, first_selector, publication, second_selector)
     scraper = Scraper.new(publication)
     byline = doc.at(first_selector)

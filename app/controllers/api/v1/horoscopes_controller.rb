@@ -5,7 +5,9 @@ class Api::V1::HoroscopesController < Api::V1::BaseController
   end
 
   def index
-    @horoscopes = policy_scope(Horoscope)
+    paginate json: policy_scope(Horoscope).by_date, per_page: 25
+
+    # @horoscopes = policy_scope(Horoscope)
   end
 
   private
