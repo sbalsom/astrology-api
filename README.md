@@ -19,6 +19,7 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 ```
 /api/v1/horoscopes
 ```
+
 ```
 /api/v1/authors/ 
 ```
@@ -27,7 +28,24 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 /api/v1/publications/
 ```
 
-And a single instance of an author, pulication, or horoscope can be viewed by its id :
+Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words `/api/v1/horoscopes` is the same as `/api/v1/horoscopes?page=1`. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.
+
+Along with the page number, each model responds to queries which are documented in this table :
+
+Horoscope 
+- range_in_days ... dailies = 1, weeklies = 7, monthlies = 30
+- word_count ... 
+- mood ... 
+
+Author
+- full_name
+
+Publication
+- name 
+
+
+
+A single instance of an author, publication, or horoscope can be viewed by adding its id to the path:
 
 ```
 /api/v1/horoscopes/:id
