@@ -44,7 +44,6 @@ Publication
 - name 
 
 
-
 A single instance of an author, publication, or horoscope can be viewed by adding its id to the path:
 
 ```
