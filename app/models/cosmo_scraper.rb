@@ -1,9 +1,9 @@
 class CosmoScraper < Scraper
 
-  def start
+  def start(upper_limit)
     cosmo_links = []
     i = 1
-    while i <= 70
+    while i <= upper_limit
       selector = ".full-item-title"
       cosmo_infinite_url = "https://www.cosmopolitan.com/ajax/infiniteload/?id=62fa165c-d912-4e6f-9b34-c215d4f288e2&class=CoreModels%5Ccollections%5CCollectionModel&viewset=collection&page=#{i}&cachebuster=362ce01c-9ff7-4b0a-bb8e-00fdbd99f3cd"
       cosmo_links += compile_links(cosmo_infinite_url, selector)

@@ -1,8 +1,8 @@
 class TeenVogueScraper < Scraper
 
-  def start
+  def start(upper_limit)
     i = 1
-    while i < 10
+    while i < upper_limit
       url = "https://www.teenvogue.com/api/search?page=#{i}&size=10&sort=publishDate%20desc&types=%22article%22%2C%22gallery%22&categoryIds=%225a4d5863aed9070f9ecfbf4a%22&tags=%22weekly%20horoscopes%22"
       uri = URI(url)
       response = Net::HTTP.get(uri)

@@ -1,7 +1,6 @@
 class AutoScraper < Scraper
 
   def start
-    #  this part can be in the scraper
     selector = ".entry-title a"
     i = 1
     auto_links = []

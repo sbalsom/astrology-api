@@ -2,7 +2,6 @@ require 'nokogiri'
 require 'open-uri'
 require 'pry-byebug'
 require 'net/http'
-require 'watir'
 require_relative 'scraper'
 require 'net/http'
 require 'json'
@@ -59,11 +58,10 @@ class Horoscope < ApplicationRecord
     range_in_days == 1
   end
 
-
-  def self.fetch_vice_horoscopes
+  def self.fetch_vice_horoscopes(upper_limit) # upper limit max is 190
     vice = Publication.find_by(name: "Vice")
     scraper = ViceScraper.new(vice)
-    scraper.start
+    scraper.start(upper_limit)
   end
 
   def self.fetch_allure_horoscopes
@@ -84,10 +82,10 @@ class Horoscope < ApplicationRecord
     scraper.start
   end
 
-  def self.fetch_cosmo_horoscopes
+  def self.fetch_cosmo_horoscopes(upper_limit) # upper limit max is 70
     cosmo = Publication.find_by(name: "Cosmopolitan")
     scraper = CosmoScraper.new(cosmo)
-    scraper.start
+    scraper.start(upper_limit)
   end
 
   def self.fetch_mask_horoscopes
@@ -96,16 +94,16 @@ class Horoscope < ApplicationRecord
     scraper.start
   end
 
-  def self.fetch_cut_horoscopes
+  def self.fetch_cut_horoscopes(upper_limit) # upper limit max is 250 must increment by 50
     cut = Publication.find_by(name: "The Cut")
     scraper = CutScraper.new(cut)
-    scraper.start
+    scraper.start(upper_limit)
   end
 
-  def self.fetch_teen_vogue_horoscopes
+  def self.fetch_teen_vogue_horoscopes(upper_limit) # upper limit max is 10
     teen_vogue = Publication.find_by(name: "Teen Vogue")
     scraper = TeenVogueScraper.new(teen_vogue)
-    scraper.start
+    scraper.start(upper_limit)
   end
 
   def self.fetch_refinery_horoscopes
@@ -115,22 +113,3 @@ class Horoscope < ApplicationRecord
   end
 
 end
-
-# I want to add to my database :
-
-# jessica lanyadoo (offset pagination hard to scrape ?)
-# astrology zone - current month and current year only for every sign - easy !
-# cafe astrology - there is a lot going on here -- maybe come back to this
-# channi nicholas --
-# refinery 29
-
-
-# an api view for authors
-# more keywords for each horoscope (emotions, other)
-# handling method for 2015 monthlies
-
-# more associations : author has many publications, through horoscopes
-
-
-# Vice : 190 pages total going back to 2015
-

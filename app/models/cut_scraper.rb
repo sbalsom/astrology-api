@@ -1,10 +1,10 @@
 class CutScraper < Scraper
 
-  def start
+  def start(upper_limit)
     links = []
     selector = '.main-article-content a'
     i = 0
-    while i <= 250
+    while i <= upper_limit
       url = "https://www.thecut.com/tags/astrology/?start=#{i}"
       links += compile_links(url, selector)
       i += 50

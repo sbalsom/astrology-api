@@ -47,3 +47,22 @@ And a single instance of an author, pulication, or horoscope can be viewed by it
 
 
 
+<!-- # I want to add to my database :
+
+# jessica lanyadoo (offset pagination hard to scrape ?)
+# astrology zone - current month and current year only for every sign - easy !
+# cafe astrology - there is a lot going on here -- maybe come back to this
+# channi nicholas --
+# refinery 29
+
+
+# an api view for authors
+# more keywords for each horoscope (emotions, other)
+# handling method for 2015 monthlies
+
+# more associations : author has many publications, through horoscopes
+
+
+# Vice : 190 pages total going back to 2015
+
+ -->
