@@ -15,7 +15,32 @@ class Horoscope < ApplicationRecord
   validates :original_link, presence: true
 
   scope :by_date, -> { order(created_at: :desc) }
-  # adds keywords to any horoscope
+  scope :min_words, ->(min_words) { where('word_count >= ?', min_words) }
+  scope :range, ->(range) { where('range_in_days = ?', range) }
+  scope :mood, ->(mood) { where('mood ILIKE ?', "#{mood}%") }
+  # scope :num, ->(num) { where('num >= ?', num) }
+  # scope :str, ->(str) { where('str ILIKE ?', "#{str}%") }
+
+    # t.bigint "publication_id"
+    # t.bigint "author_id"
+    # t.text "content"
+    # t.date "start_date"
+    # t.bigint "zodiac_sign_id"
+    # t.datetime "created_at", null: false
+    # t.datetime "updated_at", null: false
+    # t.string "keywords", default: [], array: true
+    # t.string "original_link"
+
+  def self.filter(params)
+    horoscopes = Horoscope.all
+    horoscopes = horoscopes.joins(:zodiac_sign).where('zodiac_signs.name' => params[:sign]) if params[:sign].present?
+    horoscopes = horoscopes.where(start_date: (params[:beg_date]..params[:end_date])) if params[:beg_date].present? && params[:end_date].present?
+    horoscopes = horoscopes.mood(params[:mood]) if params[:mood].present?
+    horoscopes = horoscopes.min_words(params[:min_words]) if params[:min_words].present?
+    horoscopes = horoscopes.range(params[:range]) if params[:range].present?
+    horoscopes
+  end
+
 
   def handle_keywords
     kw = [

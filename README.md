@@ -1,6 +1,6 @@
 # The Astrology API
 
-This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and devleopers are encouraged to visit the original link to see the full content of the matching horoscope.
+This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and developers are encouraged to visit the original link to see the full content of the matching horoscope.
 
 ## A note about this project
 
@@ -30,18 +30,30 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 
 Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words `/api/v1/horoscopes` is the same as `/api/v1/horoscopes?page=1`. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.
 
-Along with the page number, each model responds to queries which are documented in this table :
+Each model (author, publication, and horoscope) also responds to several queries, indexed in the tables below.
 
-Horoscope 
-- range_in_days ... dailies = 1, weeklies = 7, monthlies = 30
-- word_count ... 
-- mood ... 
+For publications :
 
-Author
-- full_name
+| query | example values | explanation |
+|:--|:--|:--|
+| name | Vice, Mask Magazine, Teen%20Vogue | Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional. |
 
-Publication
-- name 
+For authors :
+
+| query | example values | explanation |
+|:--|:--|:--|
+| name | Corina, ra, Annabel%20Gat | Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional. |
+|min_count| 30, 1000, 1| Each author is given a horoscope_count, and the value of min_count returns only authors whose horoscope_count is above the given value.  (Returns authors who have written exactly X or more than X horoscopes) |
+
+For horoscopes :
+
+| query | example values | explanation |
+|:--|:--|:--|
+| sign | Taurus, capricorn | Searches horoscopes by sign. The sign must be entered without quotation marks, has to match the sign name exactly, but the query is case-insensitive. |
+|range| 1, 7, 30 | Horoscopes are categorized as "Daily" (range = 1), "Weekly" (range = 7), or "Monthly" (range = 30)|
+|beg_date, end_date | 11-01-2019, 23-09-2018 | Returns horoscopes published between the given dates |
+|min_words | 300, 30 | Returns horoscopes where the original content was above a given minimum word count. (Horoscope content is always truncated to 100 characters in the results) |
+|mood | Turbulent, diff, Life%20Affirming | Horoscopes are analyzed using a sentiment analysis gem, and given a score and mood keyword. The "moods" for horoscopes are : Turbulent, Difficult, Trying, Worrisome, Neutral, Reassuring, Promising, and Life-affirming. The mood keyword in the query does not have to match the horoscope mood keyword exactly. |
 
 
 A single instance of an author, publication, or horoscope can be viewed by adding its id to the path:
@@ -62,7 +74,8 @@ A single instance of an author, publication, or horoscope can be viewed by addin
 /api/v1/publications/:id
 ```
 
-
+this would work to search author by name (elastic)
+/api/v1/authors?name=co
 
 <!-- # I want to add to my database :
 

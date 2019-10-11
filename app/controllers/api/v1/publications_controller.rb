@@ -32,9 +32,3 @@ class Api::V1::PublicationsController < Api::V1::BaseController
     authorize @publication  # For Pundit
   end
 end
-
-
-
-# TODO : paginate api views
-# don't use json builders
-# define the params as they are to be called and document

@@ -4,10 +4,19 @@ require 'open-uri'
 
 class Author < ApplicationRecord
   has_many :horoscopes, dependent: :destroy
-  has_many :publications, through: :horoscopes
+  has_many :publications, -> { distinct }, through: :horoscopes
   validates :full_name, presence: true, uniqueness: true
 
   scope :by_date, -> { order(created_at: :desc) }
+  scope :min_count, ->(min_count) { where('horoscope_count >= ?', min_count) }
+  scope :full_name, ->(full_name) { where('full_name ILIKE ?', "#{full_name}%") }
+
+  def self.filter(params)
+    authors = Author.all
+    authors = authors.min_count(params[:min_count]) if params[:min_count].present?
+    authors = authors.full_name(params[:name]) if params[:name].present?
+    authors
+  end
 
   def handle_socials(doc, first_selector, publication, second_selector)
     scraper = Scraper.new(publication)
