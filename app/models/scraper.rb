@@ -99,7 +99,7 @@ class Scraper < ApplicationRecord
   def build_horoscope
     analyze_content(@content)
     @content = "#{@content.truncate(100)}... #{@content.split(' ').count} words by #{@author.full_name}. Read the original at #{@url}"
-  if Horoscope.where(content: @content).empty?
+    if Horoscope.where(content: @content).empty?
       h = Horoscope.create(
         zodiac_sign: @sign,
         content: @content,
@@ -114,8 +114,6 @@ class Scraper < ApplicationRecord
       @author.horoscope_count += 1
       @author.save
       h.handle_keywords
+    end
   end
 end
-
-end
-
