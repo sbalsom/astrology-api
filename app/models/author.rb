@@ -14,7 +14,7 @@ class Author < ApplicationRecord
   def self.filter(params)
     authors = Author.all
     authors = authors.min_count(params[:min_count]) if params[:min_count].present?
-    authors = authors.full_name(params[:name]) if params[:name].present?
+    authors = authors.full_name(params[:full_name]) if params[:full_name].present?
     authors
   end
 

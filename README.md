@@ -8,11 +8,16 @@ My intention is to both catalogue these horoscopes in an organized fashion, as w
 
 Eventually, I hope to add further complexity to the sentiment analysis, possible adding methods and operations to compare the writing styles and predictions given by each author, and take into account the emotional connotations of words specific to astrology, like "square", "trine", "eclipse", and so on. 
 
-My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead.
+My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead. What we call horoscope "content" in the database is actually the original horoscope content truncated to 100 characters, appended by the author name, word count, and original link.
 
 Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.
 
 # How to use the API
+
+The base url of the API, where this documentation can be found, is "
+```
+horoscope-api.best (tbd)
+```
 
 Horoscopes, publications, and authors are indexed at their respective endpoints :
 
@@ -42,7 +47,7 @@ For authors :
 
 | query | example values | explanation |
 |:--|:--|:--|
-| name | Corina, ra, Annabel%20Gat | Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional. |
+| full_name | Corina, ra, Annabel%20Gat | Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional. |
 |min_count| 30, 1000, 1| Each author is given a horoscope_count, and the value of min_count returns only authors whose horoscope_count is above the given value.  (Returns authors who have written exactly X or more than X horoscopes) |
 
 For horoscopes :
@@ -51,10 +56,21 @@ For horoscopes :
 |:--|:--|:--|
 | sign | Taurus, capricorn | Searches horoscopes by sign. The sign must be entered without quotation marks, has to match the sign name exactly, but the query is case-insensitive. |
 |range| 1, 7, 30 | Horoscopes are categorized as "Daily" (range = 1), "Weekly" (range = 7), or "Monthly" (range = 30)|
-|beg_date, end_date | 11-01-2019, 23-09-2018 | Returns horoscopes published between the given dates |
+|beg_date, end_date | 11-01-2019, 23-09-2018 | Returns horoscopes published* between the given dates |
 |min_words | 300, 30 | Returns horoscopes where the original content was above a given minimum word count. (Horoscope content is always truncated to 100 characters in the results) |
 |mood | Turbulent, diff, Life%20Affirming | Horoscopes are analyzed using a sentiment analysis gem, and given a score and mood keyword. The "moods" for horoscopes are : Turbulent, Difficult, Trying, Worrisome, Neutral, Reassuring, Promising, and Life-affirming. The mood keyword in the query does not have to match the horoscope mood keyword exactly. |
 
+** Usually "start_date" corresponds to date published, i.e. when the horoscope for the week of November 1st - 8th is published on November 1st. Depending on the practice of the publication, some horoscopes might have been originally published on a day proceeding the "start_date", as in the case of Vice dailies, which are actually published the night before the horoscope "begins". The API currently does not save publishing dates, only start_date (the day on which the horoscope becomes applicable). If any users of the API want to know the exact original publishing date, they should return to the original article and access it in the metadata of that page.
+
+An example  of a full search query might be :
+
+```
+horoscope-api.best/api/v1/horoscopes?min_words=300&sign=Taurus&range=7
+```
+
+This would return weekly horoscopes for Taurus where the original content is above 300 words.
+
+## Accessing individual records
 
 A single instance of an author, publication, or horoscope can be viewed by adding its id to the path:
 
@@ -74,30 +90,16 @@ A single instance of an author, publication, or horoscope can be viewed by addin
 /api/v1/publications/:id
 ```
 
-this would work to search author by name (elastic)
-/api/v1/authors?name=co
+The id is found within the record of the given instance :
 
-<!-- # I want to add to my database :
+```
+author": {
+"id": 118,
+"full_name": "Annabel Gat",
+"created_at": "2019-10-05T11:35:30.933Z",
+"updated_at": "2019-10-05T12:02:42.643Z",
+...
+}
+```
 
-# jessica lanyadoo (offset pagination hard to scrape ?)
-# astrology zone - current month and current year only for every sign - easy !
-# cafe astrology - there is a lot going on here -- maybe come back to this
-# channi nicholas --
-# refinery 29
-# Add weekly and daily fetch methods to sidekiq
-# in controllers deal with params
-# use a paginator to paginate pages
-# write about all this in readme
-# finally deploy to heroku
-
-# an api view for authors
-# more keywords for each horoscope (emotions, other)
-# handling method for 2015 monthlies
-
-# more associations : author has many publications, through horoscopes
-
-
-
-# Vice : 190 pages total going back to 2015 -->
-
-
+"created_at" and "updated_at" describe when the record was added to the database, and when the record was last updated. They should not be confused with other attributes like "start_date" for horoscope.
