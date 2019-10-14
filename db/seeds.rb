@@ -1,43 +1,42 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
-# puts "destroying old data"
 
 # Horoscope.destroy_all
 # Publication.destroy_all
 # Author.destroy_all
 # # ZodiacSign.destroy_all
 
-# puts "creating publications"
+puts "creating publications"
 
 # ONLY ONCE
 
-# Publication.create(name: "Vice")
-# Publication.create(name: "Allure")
-# Publication.create(name: "Elle")
-# Publication.create(name: "Autostraddle")
+Publication.create(name: "Vice", url: "https://www.vice.com")
+Publication.create(name: "Allure", url: "https://www.allure.com/")
+Publication.create(name: "Elle", url: "https://www.elle.com")
+Publication.create(name: "Cosmopolitan", url: "https://www.cosmopolitan.com")
+Publication.create(name: "Mask Magazine", url: "http://www.maskmagazine.com")
+Publication.create(name: "The Cut", url: "https://www.thecut.com")
+Publication.create(name: "Teen Vogue", url: "https://www.teenvogue.com")
+Publication.create(name: "Autostraddle", url: "https://www.autostraddle.com")
+# Publication.create(name: "Refinery 29", url: "https://www.refinery29.com/")
 
-# puts "#{Publication.count} publications created"
+puts "#{Publication.count} publications created"
 
-#  ONLY ONCE
 
-# puts "making the zodiac"
-# ZODIAC = ['Aries', 'Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']
-# ZODIAC.each do |zodiac|
-#   ZodiacSign.create!(name: zodiac)
-# end
+puts "making the zodiac"
 
-# puts "#{ZodiacSign.count} signs created"
+ZODIAC = ['Aries', 'Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']
+ZODIAC.each do |zodiac|
+   ZodiacSign.create!(name: zodiac)
+end
 
-# ALL THE TIME
+puts "#{ZodiacSign.count} signs created"
 
-# Horoscope.fetch_vice_horoscopes
-# Horoscope.fetch_allure_horoscopes
-# Horoscope.fetch_elle_horoscopes
-# etc
+Horoscope.fetch_vice_horoscopes(190)
+Horoscope.fetch_allure_horoscopes
+Horoscope.fetch_autostraddle_horoscopes
+Horoscope.fetch_elle_horoscopes
+Horoscope.fetch_cosmo_horoscopes(70)
+Horoscope.fetch_mask_horoscopes
+Horoscope.fetch_cut_horoscopes(250)
+Horoscope.fetch_teen_vogue_horoscopes(10)
+# Horoscope.fetch_refinery_horoscopes
 
-# I want most of these to run only once, and some of them to run all the time ...
