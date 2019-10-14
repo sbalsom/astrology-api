@@ -1,45 +1,150 @@
 <div class="home-page-container">
   <h1>The Astrology API</h1>
 
-  <p>This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and devleopers are encouraged to visit the original link to see the full content of the matching horoscope.</p>
+  <p>This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and developers are encouraged to visit the original link to see the full content of the matching horoscope.</p>
 
   <h2>A note about this project</h2>
 
-  <p>My intention is to both catalogue these horoscopes in an organized fashion, as well as provide a record for authors of the number of horoscopes they have written. A simple sentiment analysis algorithm is applied to each horoscope using the <a href="https://github.com/nzaillian/sentiment_lib">sentiment_lib</a> gem by <a href="https://github.com/nzaillian">nzaillian</a>. This algorithm gives each horoscope a score from -20 to 20, and a corresponding mood keyword is then accorded to the horoscope instance.
+  <p>My intention is to both catalogue these horoscopes in an organized fashion, as well as provide a record for authors of the number of horoscopes they have written. A simple sentiment analysis algorithm is applied to each horoscope using the [sentiment_lib](https://github.com/nzaillian/sentiment_lib) gem by @nzaillian. This algorithm gives each horoscope a score from -20 to 20, and a corresponding mood keyword is then accorded to the horoscope instance.</p>
 
   <p>Eventually, I hope to add further complexity to the sentiment analysis, possible adding methods and operations to compare the writing styles and predictions given by each author, and take into account the emotional connotations of words specific to astrology, like "square", "trine", "eclipse", and so on.</p>
 
-  <p>My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead.</p>
+  <p>My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead. What we call horoscope "content" in the database is actually the original horoscope content truncated to 100 characters, appended by the author name, word count, and original link.</p>
 
   <p>Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.</p>
+<div class="max-800">
 
-  <h2>How to use the API</h2>
+    <h2>How to use the API</h2>
 
-  <p>Horoscopes, publications, and authors are indexed at their respective endpoints :</p>
+    <p>The base url of the API, where this documentation can be found, is available at</p>
+    <code>secure-lowlands-96111.herokuapp.com/</code>
+    <p>all paths should be appended to this base url</p>
 
-  <div class="home-page__code-wrapper flex-center-vert">
-    <code>/api/v1/horoscopes</code>
+    <p>Horoscopes, publications, and authors are indexed at their respective endpoints :</p>
+    <div class="home-page__code-wrapper flex-center-vert">
+      <code>/api/v1/horoscopes</code>
 
-    <code>/api/v1/authors/</code>
+      <code>/api/v1/authors/</code>
 
-    <code>/api/v1/publications/</code>
-  </div>
+      <code>/api/v1/publications/</code>
+    </div>
 
-  </p>
 
-  <p>And a single instance of an author, pulication, or horoscope can be viewed by its id :</p>
+    <p>Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words <code>/api/v1/horoscopes</code> is the same as <code>/api/v1/horoscopes?page=1</code>. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.</p>
 
-  <p>
-  <div class="home-page__code-wrapper flex-center-vert">
-    <code>/api/v1/horoscopes/:id</code>
+    <p>Each model (author, publication, and horoscope) also responds to several queries, indexed in the tables below.</p>
 
-    <code>/api/v1/authors/:id</code>
-
-    <code>/api/v1/horoscopes/:id</code>
-
-    <code>/api/v1/publications/:id</code>
   </div>
 
 
-  </p>
+<div class="max-800">
+
+    <h3>For publications :</h3>
+    <table>
+      <tr>
+        <th>query</th>
+        <th>example values</th>
+        <th>explanation</th>
+      </tr>
+      <tr>
+        <td>name </td>
+        <td>Vice, Mask Magazine, Teen%20Vogue </td>
+        <td>Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional.</td>
+      </tr>
+    </table>
+
+    <h3>For authors :</h3>
+    <table>
+      <tr>
+        <th>query</th>
+        <th>example values</th>
+        <th>explanation</th>
+      </tr>
+      <tr>
+        <td>full_name</td>
+        <td>Corina, ra, Annabel%20Gat</td>
+        <td>Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional.</td>
+      </tr>
+      <tr>
+        <td>min_count</td>
+        <td>30, 1000, 1</td>
+        <td>Each author is given a horoscope_count, and the value of min_count returns only authors whose horoscope_count is above the given value.  (Returns authors who have written exactly X or more than X horoscopes)</td>
+      </tr>
+    </table>
+
+
+  <h3>For horoscopes :</h3>
+  <table>
+    <tr>
+      <th>query</th>
+      <th>example values</th>
+      <th>explanation</th>
+    </tr>
+    <tr>
+      <td>sign</td>
+      <td>Taurus, capricorn</td>
+      <td>Searches horoscopes by sign. The sign must be entered without quotation marks, has to match the sign name exactly, but the query is case-insensitive. </td>
+    </tr>
+    <tr>
+      <td>range</td>
+      <td> 1, 7, 30 </td>
+      <td>Horoscopes are categorized as "Daily" (range = 1), "Weekly" (range = 7), or "Monthly" (range = 30) </td>
+    </tr>
+    <tr>
+      <td>beg_date, end_date</td>
+      <td>11-01-2019, 23-09-2018 </td>
+      <td>Returns horoscopes published* between the given dates</td>
+    </tr>
+    <tr>
+      <td>min_words</td>
+      <td>300, 30</td>
+      <td>Returns horoscopes where the original content was above a given minimum word count. (Horoscope content is always truncated to 100 characters in the results)</td>
+    </tr>
+    <tr>
+      <td>mood</td>
+      <td>Turbulent, diff, Life%20Affirming</td>
+      <td>Horoscopes are analyzed using a sentiment analysis gem, and given a score and mood keyword. The "moods" for horoscopes are : Turbulent, Difficult, Trying, Worrisome, Neutral, Reassuring, Promising, and Life-affirming. The mood keyword in the query does not have to match the horoscope mood keyword exactly.</td>
+    </tr>
+  </table>
+  </div>
+
+  <p class="aside">* Usually "start_date" corresponds to date published, i.e. when the horoscope for the week of November 1st - 8th is published on November 1st. Depending on the practice of the publication, some horoscopes might have been originally published on a day proceeding the "start_date", as in the case of Vice dailies, which are actually published the night before the horoscope "begins". The API currently does not save publishing dates, only start_date (the day on which the horoscope becomes applicable). If any users of the API want to know the exact original publishing date, they should return to the original article and access it in the metadata of that page.</p>
+<div class="max-800">
+
+    <p>An example  of a full search query might be :</p>
+
+    <code>secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?min_words=300&sign=Taurus&range=7
+    </code>
+
+    <p>This would return weekly horoscopes for Taurus where the original content is above 300 words.</p>
+</div>
+  <div class="max-800">
+    <h2>Accessing individual records</h2>
+
+    <p>A single instance of an author, publication, or horoscope can be viewed by adding its id to the path:</p>
+
+    <div class="home-page__code-wrapper flex-center-vert">
+      <code>/api/v1/horoscopes/:id</code>
+
+      <code>/api/v1/authors/:id</code>
+
+      <code>/api/v1/horoscopes/:id</code>
+
+      <code>/api/v1/publications/:id</code>
+    </div>
+      <p>The id is found within the record of the given instance :</p>
+
+      <code>author": {
+      "id": 118,
+      "full_name": "Annabel Gat",
+      "created_at": "2019-10-05T11:35:30.933Z",
+      "updated_at": "2019-10-05T12:02:42.643Z",
+      ...
+      }
+      </code>
+
+
+      <p>"created_at" and "updated_at" describe when the record was added to the database, and when the record was last updated. They should not be confused with other attributes like "start_date" for horoscope.
+      </p>
+    </div>
 </div>

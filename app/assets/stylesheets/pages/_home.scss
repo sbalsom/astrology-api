@@ -2,6 +2,9 @@
 .home-page-container {
   color: white;
   padding: 40px;
+  display: flex;
+  flex-direction:column;
+  align-items:center;
 
   a {
     color: rgba(239, 225, 79, 1.00);
@@ -13,7 +16,6 @@
   }
 
   p {
-    max-width: 800px;
     text-align: justify;
   }
 
@@ -23,7 +25,46 @@
 
 }
 
-.home-page__code-wrapper {
+.aside {
+  background: rgba(239, 225, 79, 1.00);
+  color: rgba(6, 31, 121, 1.00);
+  font-size: 13px;
+  max-width: 600px;
+  padding: 20px;
+  // align-self:flex-start;
+}
 
+.max-800 {
+  max-width: 800px;
+}
 
+code {
+  background: white;
+  padding: 20px;
+  margin: 10px;
+  max-width: 300px;
+  min-width: fit-content;
+  color: rgba(6, 31, 121, 1.00);
+  display: inline-block;
+}
+
+p code {
+  background: white;
+  color: rgba(6, 31, 121, 1.00);
+  padding: 2px;
+}
+
+table {
+  background: white;
+  color: rgba(6, 31, 121, 1.00);
+  margin: 20px;
+}
+
+td {
+  border: 1px solid rgba(6, 31, 121, 1.00);
+  padding: 10px 20px;
+}
+
+th {
+  padding: 20px;
 }
