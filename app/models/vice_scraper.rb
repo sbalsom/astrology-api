@@ -1,4 +1,4 @@
-# require 'pry-byebug'
+
 class ViceScraper < Scraper
 
   def start(upper_limit)

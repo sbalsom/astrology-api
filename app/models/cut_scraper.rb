@@ -67,5 +67,3 @@ class CutScraper < Scraper
   end
 
 end
-
-# signs = text.scan(/~\*~\w{2,20}\sWeekly Horoscope~\*~/).gsub(/\sWeekly\sHoroscope/, '').split(/~\*~~\*~/).map { |x| x.gsub(/(~|\*)/, '') }
