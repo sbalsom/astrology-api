@@ -1,4 +1,14 @@
 <div class="home-page-container">
+  <p>Your donations help to keep the database up and running ! Any amount is appreciated. Thank you. </p>
+   <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_donations" />
+<input type="hidden" name="business" value="YPJM24X3YYEP4" />
+<input type="hidden" name="currency_code" value="USD" />
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+</form>
+<br>
+<div class="max-800">
   <h1>The Astrology API</h1>
 
   <p>This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and developers are encouraged to visit the original link to see the full content of the matching horoscope.</p>
@@ -12,6 +22,7 @@
   <p>My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead. What we call horoscope "content" in the database is actually the original horoscope content truncated to 100 characters, appended by the author name, word count, and original link.</p>
 
   <p>Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.</p>
+  </div>
 <div class="max-800">
 
     <h2>How to use the API</h2>
@@ -30,7 +41,7 @@
     </div>
 
 
-    <p>Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words <code>/api/v1/horoscopes</code> is the same as <code>/api/v1/horoscopes?page=1</code>. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.</p>
+    <p>Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words <code>/api/v1/horoscopes</code> is the same as <code>/api/v1/horoscopes?page=1</code>. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number. If no page number is entered, the default is page one.</p>
 
     <p>Each model (author, publication, and horoscope) also responds to several queries, indexed in the tables below.</p>
 
@@ -73,7 +84,7 @@
     </table>
 
 
-  <h3>For horoscopes :</h3>
+  <p>For horoscopes :</p>
   <table>
     <tr>
       <th>query</th>
@@ -113,10 +124,10 @@
 
     <p>An example  of a full search query might be :</p>
 
-    <code>secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?min_words=300&sign=Taurus&range=7
+    <code>secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&min_words=300&sign=Taurus&range=7
     </code>
 
-    <p>This would return weekly horoscopes for Taurus where the original content is above 300 words.</p>
+    <p>This would return weekly horoscopes for Taurus where the original content is above 300 words, from the third page of overall horoscope results.</p>
 </div>
   <div class="max-800">
     <h2>Accessing individual records</h2>
@@ -147,4 +158,6 @@
       <p>"created_at" and "updated_at" describe when the record was added to the database, and when the record was last updated. They should not be confused with other attributes like "start_date" for horoscope.
       </p>
     </div>
+
+
 </div>
