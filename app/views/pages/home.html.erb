@@ -15,13 +15,14 @@
 
   <h2>A note about this project</h2>
 
-  <p>My intention is to both catalogue these horoscopes in an organized fashion, as well as provide a record for authors of the number of horoscopes they have written. A simple sentiment analysis algorithm is applied to each horoscope using the [sentiment_lib](https://github.com/nzaillian/sentiment_lib) gem by @nzaillian. This algorithm gives each horoscope a score from -20 to 20, and a corresponding mood keyword is then accorded to the horoscope instance.</p>
+  <p>My intention is to both catalogue these horoscopes in an organized fashion, as well as provide a record for authors of the number of horoscopes they have written. A simple sentiment analysis algorithm is applied to each horoscope using the <a href="https://github.com/nzaillian/sentiment_lib">sentiment_lib</a> gem by <a href="https://github.com/nzaillian">nzaillian</a>. This algorithm gives each horoscope a score from -20 to 20, and a corresponding mood keyword is then accorded to the horoscope instance.</p>
 
   <p>Eventually, I hope to add further complexity to the sentiment analysis, possible adding methods and operations to compare the writing styles and predictions given by each author, and take into account the emotional connotations of words specific to astrology, like "square", "trine", "eclipse", and so on.</p>
 
   <p>My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead. What we call horoscope "content" in the database is actually the original horoscope content truncated to 100 characters, appended by the author name, word count, and original link.</p>
 
-  <p>Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.</p>
+  <p>Please contact me at <%= mail_to "sbalsom@protonmail.com", "sbalsom@protonmail.com",
+         subject: "Feedback about the Astrology API" %> with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.</p>
   </div>
 <div class="max-800">
 
