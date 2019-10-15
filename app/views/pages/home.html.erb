@@ -104,7 +104,7 @@
     <tr>
       <td>beg_date, end_date</td>
       <td>11-01-2019, 23-09-2018 </td>
-      <td>Returns horoscopes published* between the given dates</td>
+      <td>Returns horoscopes published* between the given dates. Forats must be given as day-month-year or year-month-day</td>
     </tr>
     <tr>
       <td>min_words</td>
@@ -124,10 +124,10 @@
 
     <p>An example  of a full search query might be :</p>
 
-    <code>secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&min_words=300&sign=Taurus&range=7
+    <code>http://secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
     </code>
 
-    <p>This would return weekly horoscopes for Taurus where the original content is above 300 words, from the third page of overall horoscope results.</p>
+    <p>This would return horoscopes from Teen Vogue published between April 1 2018 and May 5 2018, from the third page of overall horoscope results.</p>
 </div>
   <div class="max-800">
     <h2>Accessing individual records</h2>
