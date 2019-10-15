@@ -52,45 +52,53 @@
 <div class="max-800">
 
     <h3>For publications :</h3>
-    <table>
-      <tr>
-        <th>query</th>
-        <th>example values</th>
-        <th>explanation</th>
-      </tr>
-      <tr>
-        <td>name </td>
-        <td>Vice, Mask Magazine, Teen%20Vogue </td>
-        <td>Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional. The publications used in the database are : Vice, Allure, Elle, Cosmopolitan, Mask Magazine, The Cut, Teen Vogue, and Autostraddle.</td>
-      </tr>
-    </table>
-    <h3>For authors :</h3>
-    <table>
-      <tr>
-        <th>query</th>
-        <th>example values</th>
-        <th>explanation</th>
-      </tr>
-      <tr>
-        <td>full_name</td>
-        <td>Corina, ra, Annabel%20Gat</td>
-        <td>Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional.</td>
-      </tr>
-      <tr>
-        <td>min_count</td>
-        <td>30, 1000, 1</td>
-        <td>Each author is given a horoscope_count, and the value of min_count returns only authors whose horoscope_count is above the given value.  (Returns authors who have written exactly X or more than X horoscopes)</td>
-      </tr>
-    </table>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+        <tr>
+          <th>query</th>
+          <th>example values</th>
+          <th>explanation</th>
+        </tr>
+        </thead>
+        <tr>
+          <td>name </td>
+          <td>Vice, Mask Magazine, Teen%20Vogue </td>
+          <td>Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional. The publications used in the database are : Vice, Allure, Elle, Cosmopolitan, Mask Magazine, The Cut, Teen Vogue, and Autostraddle.</td>
+        </tr>
+      </table>
+      <h3>For authors :</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>query</th>
+          <th>example values</th>
+          <th>explanation</th>
+        </tr>
+        </thead>
+        <tr>
+          <td>full_name</td>
+          <td>Corina, ra, Annabel%20Gat</td>
+          <td>Searches by author name, including first and last name. The name must be entered without quotation marks, and doesn't have to match the author name exactly. Using %20 to replace a space is optional.</td>
+        </tr>
+        <tr>
+          <td>min_count</td>
+          <td>30, 1000, 1</td>
+          <td>Each author is given a horoscope_count, and the value of min_count returns only authors whose horoscope_count is above the given value.  (Returns authors who have written exactly X or more than X horoscopes)</td>
+        </tr>
+      </table>
+    </div>
 
 
-  <p>For horoscopes :</p>
+  <h3>For horoscopes :</h3>
   <table>
+    <thead>
     <tr>
       <th>query</th>
       <th>example values</th>
       <th>explanation</th>
     </tr>
+    </thead>
     <tr>
       <td>sign</td>
       <td>Taurus, capricorn</td>
