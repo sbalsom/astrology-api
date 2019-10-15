@@ -1,6 +1,6 @@
 # The Astrology API
 
-This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API (not currently live). Once deployed, the API will be accessible to anyone with the url, and will allow users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and developers are encouraged to visit the original link to see the full content of the matching horoscope.
+This rails application scrapes several publications across the web that have a weekly, daily, or monthly horoscopes section, and compiles the results in a  in a public-facing API. The API is accessible to anyone with the url, and allows users to search for and sort horoscopes by publication, date, author name, keywords, sign, and mood. The content is truncated for copyright reasons, so users and developers are encouraged to visit the original link to see the full content of the matching horoscope.
 
 ## A note about this project
 
@@ -10,14 +10,16 @@ Eventually, I hope to add further complexity to the sentiment analysis, possible
 
 My original database was built around full-content horoscopes, but for copyright reasons, I eventually decided to truncate the content and add word count and mood attributes instead. What we call horoscope "content" in the database is actually the original horoscope content truncated to 100 characters, appended by the author name, word count, and original link.
 
-Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.
+Please contact me at sbalsom@protonmail.com with any questions, comments, suggestions for improvement, and bugs. If any author or publication is interested in having their full-content horoscopes indexed for internal use, or for any other collaborative project, they are welcome to contact me as well.
 
 # How to use the API
 
 The base url of the API, where this documentation can be found, is "
 ```
-horoscope-api.best (tbd)
+secure-lowlands-96111.herokuapp.com/
 ```
+
+all paths should be appended to this base url.
 
 Horoscopes, publications, and authors are indexed at their respective endpoints :
 
@@ -41,7 +43,7 @@ For publications :
 
 | query | example values | explanation |
 |:--|:--|:--|
-| name | Vice, Mask Magazine, Teen%20Vogue | Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional. |
+| name | Vice, Mask Magazine, Teen%20Vogue | Searches by publication name. The name must be entered without quotation marks and must match the publication name exactly. Using %20 to replace a space is optional. The publications used in the database are : Vice, Allure, Elle, Cosmopolitan, Mask Magazine, The Cut, Teen Vogue, and Autostraddle. |
 
 For authors :
 
@@ -56,7 +58,7 @@ For horoscopes :
 |:--|:--|:--|
 | sign | Taurus, capricorn | Searches horoscopes by sign. The sign must be entered without quotation marks, has to match the sign name exactly, but the query is case-insensitive. |
 |range| 1, 7, 30 | Horoscopes are categorized as "Daily" (range = 1), "Weekly" (range = 7), or "Monthly" (range = 30)|
-|beg_date, end_date | 11-01-2019, 23-09-2018 | Returns horoscopes published* between the given dates |
+|beg_date, end_date | 11-01-2019, 23-09-2018 | Returns horoscopes published* between the given dates. Formats must be given as day-month-year or year-month-day. |
 |min_words | 300, 30 | Returns horoscopes where the original content was above a given minimum word count. (Horoscope content is always truncated to 100 characters in the results) |
 |mood | Turbulent, diff, Life%20Affirming | Horoscopes are analyzed using a sentiment analysis gem, and given a score and mood keyword. The "moods" for horoscopes are : Turbulent, Difficult, Trying, Worrisome, Neutral, Reassuring, Promising, and Life-affirming. The mood keyword in the query does not have to match the horoscope mood keyword exactly. |
 
@@ -65,10 +67,10 @@ For horoscopes :
 An example  of a full search query might be :
 
 ```
-horoscope-api.best/api/v1/horoscopes?min_words=300&sign=Taurus&range=7
+http://secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
 ```
 
-This would return weekly horoscopes for Taurus where the original content is above 300 words.
+This would return horoscopes from Teen Vogue published between April 1 2018 and May 10 2018, from the third page of overall horoscope results.
 
 ## Accessing individual records
 
