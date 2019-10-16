@@ -32,10 +32,11 @@ class Author < ApplicationRecord
     end
   end
 
-  def handle_simple_socials(socials = [])
-    socials.each do |social|
-      socials << social unless socials.include?(social)
+  def handle_simple_socials(links = [])
+    links.each do |link|
+      socials << link unless socials.include?(link)
     end
+    save
   end
 
   def handle_one_step_socials(doc, selector)

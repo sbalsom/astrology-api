@@ -19,13 +19,6 @@ gem 'active_model_serializers'
 gem 'will_paginate'
 gem 'api-pagination'
 
-# gem 'api-pagination'
-
-# gem 'will_paginate'
-# gem 'kaminari'
-# gem 'pagy'
-# gem 'pager_api'
-
 #  setup gems for rails app
 gem 'bootsnap', require: false
 gem 'devise'
@@ -52,4 +45,8 @@ group :development, :test do
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
   gem 'dotenv-rails'
+end
+
+group :test do
+  gem "rspec-rails", "~> 3.1"
 end

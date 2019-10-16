@@ -2,6 +2,7 @@ require 'nokogiri'
 require 'open-uri'
 
 class Scraper < ApplicationRecord
+
   def initialize(publication)
     @publication = publication
     @zodiac_signs = ZodiacSign.all.map { |sign| sign.name }
