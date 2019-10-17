@@ -70,7 +70,7 @@ An example  of a full search query might be :
 http://secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
 ```
 
-This would return horoscopes from Teen Vogue published between April 1 2018 and May 10 2018, from the third page of overall horoscope results.
+This would return the third page of horoscopes from Teen Vogue published between April 1 2018 and May 10 2018.
 
 ## Accessing individual records
 
