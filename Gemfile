@@ -1,18 +1,16 @@
 source 'https://rubygems.org'
 ruby '2.6.3'
 
-#  sidekiq allows for fetching in background
-gem 'sidekiq'
+#  sidekiq gems
+gem 'redis', '~> 3'
+gem 'sidekiq', '>= 4.0.0'
 gem 'sidekiq-failures', '~> 1.0'
-
-#  redit is necessary for sidekiq to work
-gem 'redis'
-
+gem 'sinatra', '>= 2.0.0.beta2', require: false
+gem 'sidekiq-scheduler'
 # sentiment analyzes horoscopes content
 gem 'sentiment_lib'
 
 # i don't know what the sinatra gem is doing here honestly
-gem 'sinatra', '>= 2.0.0.beta2', require: false
 
 # pagination gems
 gem 'active_model_serializers'
