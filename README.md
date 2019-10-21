@@ -35,7 +35,7 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 /api/v1/publications
 ```
 
-Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words `/api/v1/horoscopes` is the same as `/api/v1/horoscopes?page=1`. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.
+Accessing any of these endpoints will return a paginated index, with 25 items per page. To access the next 25, simply change the page number. If no page number is entered, the default is page one. In other words `/api/v1/horoscopes` is the same as `/api/v1/horoscopes?page=1`. Both will return the most recent 25 horoscopes that were added to the database. 
 
 Each model (author, publication, and horoscope) also responds to several queries, indexed in the tables below.
 
