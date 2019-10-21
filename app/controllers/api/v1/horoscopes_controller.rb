@@ -4,19 +4,12 @@ class Api::V1::HoroscopesController < Api::V1::BaseController
   def show
   end
 
-   def index
+  def index
     if params
       paginate json: policy_scope(Horoscope.filter(params)).by_date, per_page: 25
     else
       paginate json: policy_scope(Horoscope).by_date, per_page: 25
     end
-  #   if params[:range_in_days]
-  #     paginate json: policy_scope(Horoscope)
-  #       .where(range_in_days: params[:range_in_days])
-  #       .by_date, per_page: 25
-  #   else
-  #     paginate json: policy_scope(Horoscope).by_date, per_page: 25
-  #   end
   end
 
   private

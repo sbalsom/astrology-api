@@ -13,7 +13,7 @@ class Horoscope < ApplicationRecord
   validates :content, presence: true, uniqueness: true
   validates :original_link, presence: true
 
-  scope :by_date, -> { order(created_at: :desc) }
+  scope :by_date, -> { order(start_date: :desc) }
   scope :min_words, ->(min_words) { where('word_count >= ?', min_words) }
   scope :range, ->(range) { where('range_in_days = ?', range) }
   scope :mood, ->(mood) { where('mood ILIKE ?', "#{mood}%") }
