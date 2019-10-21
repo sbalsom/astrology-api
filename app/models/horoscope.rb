@@ -21,6 +21,7 @@ class Horoscope < ApplicationRecord
   def self.filter(params)
     horoscopes = Horoscope.all
     horoscopes = horoscopes.joins(:zodiac_sign).where('zodiac_signs.name' => params[:sign]) if params[:sign].present?
+    horoscopes = horoscopes.joins(:publication).where('publications.name ILIKE ?', params[:publication]) if params[:publication].present?
     horoscopes = horoscopes.where(start_date: (params[:beg_date]..params[:end_date])) if params[:beg_date].present? && params[:end_date].present?
     horoscopes = horoscopes.mood(params[:mood]) if params[:mood].present?
     horoscopes = horoscopes.min_words(params[:min_words]) if params[:min_words].present?
