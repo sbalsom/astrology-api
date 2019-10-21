@@ -16,7 +16,7 @@ Please contact me at sbalsom@protonmail.com with any questions, comments, sugges
 
 The base url of the API, where this documentation can be found, is "
 ```
-secure-lowlands-96111.herokuapp.com/
+http://www.horoscope-api.site
 ```
 
 all paths should be appended to this base url.
@@ -28,11 +28,11 @@ Horoscopes, publications, and authors are indexed at their respective endpoints 
 ```
 
 ```
-/api/v1/authors/ 
+/api/v1/authors 
 ```
 
 ``` 
-/api/v1/publications/
+/api/v1/publications
 ```
 
 Accessing any of these endpoints will return a paginated index, with 25 items per page. In other words `/api/v1/horoscopes` is the same as `/api/v1/horoscopes?page=1`. Both will return the most recent 25 horoscopes that were added to the database. To access the next 25, simply change the page number.
@@ -68,7 +68,7 @@ For horoscopes :
 An example  of a full search query might be :
 
 ```
-http://secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
+http://www.horoscope-api.site/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
 ```
 
 This would return the third page of horoscopes from Teen Vogue published between April 1 2018 and May 10 2018.
