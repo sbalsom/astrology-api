@@ -22,7 +22,7 @@ class AutoScraper < Scraper
       @author.save
       @interval = 7
       @url = link
-      @date = Time.parse(doc.at('time').text)
+      @date = Time.parse(doc.at("meta[property='article:published_time']").attributes['content'].value)
       text = doc.search('.entry-content')
       handle_multiples(text)
     end
