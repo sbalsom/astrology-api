@@ -16,7 +16,7 @@ Please contact me at sbalsom@protonmail.com with any questions, comments, sugges
 
 The base url of the API, where this documentation can be found, is "
 ```
-http://www.horoscope-api.site
+http://secure-lowlands-96111.herokuapp.com
 ```
 
 all paths should be appended to this base url.
@@ -68,7 +68,7 @@ For horoscopes :
 An example  of a full search query might be :
 
 ```
-http://www.horoscope-api.site/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
+http://secure-lowlands-96111.herokuapp.com/api/v1/horoscopes?page=3&publication=Teen%20Vogue&beg_date=2018-04-01&end_date=10-05-2018
 ```
 
 This would return the third page of horoscopes from Teen Vogue published between April 1 2018 and May 10 2018.
