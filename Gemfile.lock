@@ -186,8 +186,6 @@ GEM
       rspec-mocks (~> 3.9.0)
       rspec-support (~> 3.9.0)
     rspec-support (3.9.0)
-    rufus-scheduler (3.6.0)
-      fugit (~> 1.1, >= 1.1.6)
     sassc (2.2.1)
       ffi (~> 1.9)
     sassc-rails (2.1.2)
@@ -204,13 +202,11 @@ GEM
       rack (>= 1.5.0)
       rack-protection (>= 1.5.0)
       redis (>= 3.3.5, < 5)
+    sidekiq-cron (1.1.0)
+      fugit (~> 1.1)
+      sidekiq (>= 4.2.1)
     sidekiq-failures (1.0.0)
       sidekiq (>= 4.0.0)
-    sidekiq-scheduler (3.0.0)
-      redis (>= 3, < 5)
-      rufus-scheduler (~> 3.2)
-      sidekiq (>= 3)
-      tilt (>= 1.4.0)
     simple_form (5.0.1)
       actionpack (>= 5.0)
       activemodel (>= 5.0)
@@ -277,9 +273,9 @@ DEPENDENCIES
   rspec-rails (~> 3.1)
   sassc-rails
   sentiment_lib
-  sidekiq (>= 4.0.0)
+  sidekiq
+  sidekiq-cron
   sidekiq-failures (~> 1.0)
-  sidekiq-scheduler
   simple_form (>= 5.0.0)
   sinatra (>= 2.0.0.beta2)
   spring

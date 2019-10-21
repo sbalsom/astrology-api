@@ -3,10 +3,12 @@ ruby '2.6.3'
 
 #  sidekiq gems
 gem 'redis', '~> 3'
-gem 'sidekiq', '>= 4.0.0'
+gem 'sidekiq'
 gem 'sidekiq-failures', '~> 1.0'
 gem 'sinatra', '>= 2.0.0.beta2', require: false
-gem 'sidekiq-scheduler'
+gem 'sidekiq-cron'
+# gem 'sidekiq-scheduler'
+
 # sentiment analyzes horoscopes content
 gem 'sentiment_lib'
 

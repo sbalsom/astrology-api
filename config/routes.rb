@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   require "sidekiq/web"
+  # require 'sidekiq/cron/web'
   authenticate :user, lambda { |u| u.admin } do
     mount Sidekiq::Web => '/sidekiq'
   end
@@ -13,10 +14,3 @@ Rails.application.routes.draw do
     end
   end
 end
-
-
-# namespace :api do
-#   namespace :v1 do
-#     resources :jobs, only: [:index]
-#   end
-# end
