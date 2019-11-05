@@ -17,6 +17,14 @@
   flex-direction:column;
 }
 
+.flex {
+  display:flex;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
 a {
     color: rgba(239, 225, 79, 1.00);
   }
@@ -30,6 +38,10 @@ a {
     color: white;
   }
 
-.logout {
+#logout {
   padding: 20px;
+}
+
+.signup, .forgot {
+  margin: 10px;
 }
