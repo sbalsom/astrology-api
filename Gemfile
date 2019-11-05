@@ -7,6 +7,8 @@ gem 'sidekiq'
 gem 'sidekiq-failures', '~> 1.0'
 gem 'sinatra', '>= 2.0.0.beta2', require: false
 gem 'sidekiq-cron'
+gem 'sidekiq-status'
+gem 'redis-namespace'
 # gem 'sidekiq-scheduler'
 
 # sentiment analyzes horoscopes content
