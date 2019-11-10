@@ -14,7 +14,8 @@ gem 'redis-namespace'
 # sentiment analyzes horoscopes content
 gem 'sentiment_lib'
 
-# i don't know what the sinatra gem is doing here honestly
+# loofa gem security upgrade
+gem "loofah", ">= 2.3.1"
 
 # pagination gems
 gem 'active_model_serializers'
