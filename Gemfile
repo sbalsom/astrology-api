@@ -30,7 +30,7 @@ gem 'devise'
 gem 'jbuilder'
 gem 'pg'
 gem "puma", ">= 4.3.3"
-gem 'rails', '6.0.0'
+gem 'rails', '6.0.2.2'
 gem 'pundit'
 gem 'autoprefixer-rails'
 gem 'font-awesome-sass'
