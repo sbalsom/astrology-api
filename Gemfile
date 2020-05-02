@@ -2,10 +2,10 @@ source 'https://rubygems.org'
 ruby '2.6.3'
 
 #  sidekiq gems
-gem 'redis', '~> 3'
+gem 'redis'
 gem 'sidekiq'
-gem 'sidekiq-failures', '~> 1.0'
-gem 'sinatra', '>= 2.0.0.beta2', require: false
+gem 'sidekiq-failures'
+gem 'sinatra'
 gem 'sidekiq-cron'
 gem 'sidekiq-status'
 gem 'redis-namespace'
@@ -15,41 +15,43 @@ gem 'redis-namespace'
 gem 'sentiment_lib'
 
 # loofa gem security upgrade
-gem "loofah", ">= 2.3.1"
+gem "loofah"
 
 # pagination gems
 gem 'active_model_serializers'
 gem 'will_paginate'
 gem 'api-pagination'
 
+gem "nokogiri", ">= 1.10.8"
+
 #  setup gems for rails app
 gem 'bootsnap', require: false
 gem 'devise'
-gem 'jbuilder', '~> 2.0'
-gem 'pg', '~> 0.21'
-gem 'puma'
-gem 'rails', '5.2.3'
+gem 'jbuilder'
+gem 'pg'
+gem "puma", ">= 4.3.3"
+gem 'rails', '6.0.0'
 gem 'pundit'
 gem 'autoprefixer-rails'
-gem 'font-awesome-sass', '~> 5.6.1'
+gem 'font-awesome-sass'
 gem 'sassc-rails'
-gem "simple_form", ">= 5.0.0"
+gem "simple_form"
 gem 'uglifier'
 gem 'webpacker'
 
 group :development do
-  gem 'web-console', '>= 3.3.0'
+  gem 'web-console'
 end
 
 group :development, :test do
   gem 'pry-byebug'
   gem 'pry-rails'
-  gem 'listen', '~> 3.0.5'
+  gem 'listen'
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen'
   gem 'dotenv-rails'
 end
 
 group :test do
-  gem "rspec-rails", "~> 3.1"
+  gem "rspec-rails"
 end
