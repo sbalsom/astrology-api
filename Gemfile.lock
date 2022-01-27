@@ -224,7 +224,7 @@ GEM
     sentiment_lib (0.2.1)
       rspec (>= 2)
       stemmer (>= 1)
-    sidekiq (6.2.1)
+    sidekiq (6.4.0)
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
